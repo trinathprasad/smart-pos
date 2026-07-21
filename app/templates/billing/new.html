@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}New Bill | Local Shop Billing{% endblock %}
+{% block body_class %}page-billing{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-1">New Bill</h1>
+        <p class="text-muted mb-0">Invoice {{ draft_invoice or "will be generated" }}</p>
+    </div>
+    <a href="{{ url_for('products.create') }}" class="btn btn-outline-primary">Add New Product</a>
+</div>
+
+<form method="post" id="billing-form">
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Saved Customer</label>
+                            <select class="form-select" name="customer_id" id="customer-id">
+                                <option value="">Walk-in customer</option>
+                                {% for customer in customers %}
+                                    <option value="{{ customer.id }}" data-balance="{{ customer.balance_due }}">
+                                        {{ customer.name }}{% if customer.phone %} - {{ customer.phone }}{% endif %}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text" id="customer-balance" hidden></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Customer Name</label>
+                            <input type="text" class="form-control" name="customer_name" placeholder="Optional">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Previous Pending Amount</label>
+                            <input type="number" class="form-control" name="previous_pending_amount" id="previous-pending-amount" min="0" step="0.01" value="0.00">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Payment Mode</label>
+                            <select class="form-select" name="payment_mode">
+                                <option>Cash</option>
+                                <option>UPI</option>
+                                <option>Card</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Payment Status</label>
+                            <select class="form-select" name="payment_status" id="payment-status">
+                                <option>Paid</option>
+                                <option>Pending</option>
+                                <option>Partial</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Paid Amount</label>
+                            <input type="number" class="form-control" name="paid_amount" id="paid-amount" min="0" step="0.01" placeholder="For partial payment">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Payment Details</label>
+                            <input type="text" class="form-control" name="payment_reference" placeholder="UPI ID, card ref, note">
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table align-middle" id="bill-items">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50%">Product</th>
+                                    <th style="width: 15%">Price</th>
+                                    <th style="width: 15%">Qty</th>
+                                    <th style="width: 15%">Total</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="bill-row">
+                                    <td>
+                                        <div class="product-picker">
+                                            <select class="product-select visually-hidden" name="product_id[]" tabindex="-1" aria-hidden="true">
+                                                <option value="">Select product</option>
+                                                {% for product in products %}
+                                                    <option value="{{ product.id }}" data-price="{{ product.selling_price }}" data-stock="{{ product.stock_qty }}">
+                                                        {{ product.name }} ({{ product.sku }}) - Stock {{ "%.2f"|format(product.stock_qty) }}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                            <button type="button" class="form-select text-start product-picker-trigger" aria-expanded="false">
+                                                Select product
+                                            </button>
+                                            <div class="product-picker-panel" hidden>
+                                                <input type="search" class="form-control product-picker-search" placeholder="Search by product name or code" autocomplete="off">
+                                                <div class="product-picker-results" role="listbox"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="price-cell">₹0.00</td>
+                                    <td><input type="number" class="form-control qty-input" name="qty[]" min="0.01" step="0.01" value="1" inputmode="decimal"></td>
+                                    <td class="line-total-cell">₹0.00</td>
+                                    <td><button type="button" class="btn btn-outline-danger btn-sm remove-row">Remove</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <button type="button" class="btn btn-outline-primary" id="add-row">Add Item</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card summary-card">
+                <div class="card-body">
+                    <h5 class="mb-3">Bill Summary</h5>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal</span>
+                        <strong id="subtotal">₹0.00</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Tax ({{ "%.2f"|format(settings.tax_percent) }}%)</span>
+                        <strong id="tax-amount">₹0.00</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Previous Pending</span>
+                        <strong id="previous-pending">Rs 0.00</strong>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <span>Total Payable</span>
+                        <strong class="fs-5" id="grand-total">₹0.00</strong>
+                    </div>
+                    <button class="btn btn-primary w-100 mt-4">Save Bill</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    window.billingConfig = {
+        taxPercent: Number("{{ settings.tax_percent }}")
+    };
+</script>
+<script src="{{ url_for('static', filename='js/billing.js') }}"></script>
+{% endblock %}

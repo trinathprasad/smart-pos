@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}{{ "Edit Product" if product else "Add Product" }} | Local Shop Billing{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body p-4">
+                <h1 class="h3 mb-4">{{ "Edit Product" if product else "Add Product" }}</h1>
+                <form method="post" class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">SKU</label>
+                        <input type="text" name="sku" class="form-control" value="{{ product.sku if product else '' }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Product Name</label>
+                        <input type="text" name="name" class="form-control" value="{{ product.name if product else '' }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Category</label>
+                        <input type="text" name="category" class="form-control" value="{{ product.category if product else '' }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Unit</label>
+                        <input type="text" name="unit" class="form-control" value="{{ product.unit if product else 'pcs' }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Purchase Price</label>
+                        <input type="number" name="purchase_price" step="0.01" min="0" class="form-control" value="{{ product.purchase_price if product else '' }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Selling Price</label>
+                        <input type="number" name="selling_price" step="0.01" min="0" class="form-control" value="{{ product.selling_price if product else '' }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Stock Qty</label>
+                        <input type="number" name="stock_qty" step="0.01" min="0" class="form-control" value="{{ product.stock_qty if product else '' }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Low Stock Alert At</label>
+                        <input type="number" name="low_stock_threshold" step="0.01" min="0" class="form-control" value="{{ product.low_stock_threshold if product else '0' }}" required>
+                    </div>
+                    <div class="col-12 d-flex gap-2">
+                        <button class="btn btn-primary">{{ "Update Product" if product else "Save Product" }}</button>
+                        <a href="{{ url_for('products.index') }}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+instance/
+build/
+dist/
+exports/
+device_report.xlsx
+instance/
+*.db
+*.db-journal
+.vscode/
+.idea/
+exports/

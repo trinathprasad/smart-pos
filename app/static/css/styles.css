@@ -1,0 +1,313 @@
+:root {
+    --brand-primary: #18B5E5;
+    --brand-primary-dark: #0A8EC2;
+    --brand-white: #FFFFFF;
+    --brand-background: #F7FBFD;
+    --brand-text: #1F2937;
+    --brand-muted: #64748B;
+    --brand-border: #D8EAF2;
+    --brand-header: #EAF8FC;
+    --brand-danger: #DC2626;
+    --brand-success: #15803D;
+}
+
+body {
+    min-height: 100vh;
+    background-color: var(--brand-background);
+    color: var(--brand-text);
+}
+
+.page-login,
+.page-dashboard,
+.page-products,
+.page-billing,
+.page-invoice,
+.page-reports,
+.page-settings {
+    background-color: var(--brand-background);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: var(--brand-text);
+    font-weight: 700;
+}
+
+.text-muted {
+    color: var(--brand-muted) !important;
+}
+
+.navbar {
+    background-color: var(--brand-primary) !important;
+    border-bottom: 1px solid var(--brand-primary-dark);
+}
+
+.navbar-brand {
+    color: var(--brand-white);
+    letter-spacing: 0;
+}
+
+.navbar-dark .navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.88);
+    font-weight: 600;
+}
+
+.navbar-dark .navbar-nav .nav-link:hover,
+.navbar-dark .navbar-nav .nav-link:focus {
+    color: var(--brand-white);
+}
+
+.navbar-dark .navbar-toggler {
+    border-color: rgba(255, 255, 255, 0.45);
+}
+
+.stat-card,
+.summary-card,
+.invoice-card,
+.card {
+    border: 1px solid var(--brand-border);
+    border-radius: 8px;
+    background-color: var(--brand-white);
+    box-shadow: 0 10px 24px rgba(31, 41, 55, 0.07);
+}
+
+.card-header {
+    border-bottom-color: var(--brand-border);
+    background-color: var(--brand-white);
+    color: var(--brand-text);
+    font-weight: 700;
+}
+
+.summary-card {
+    position: sticky;
+    top: 1rem;
+}
+
+.btn {
+    border-radius: 6px;
+    font-weight: 600;
+    box-shadow: none !important;
+}
+
+.btn-primary {
+    border-color: var(--brand-primary);
+    background-color: var(--brand-primary);
+    color: var(--brand-white);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    border-color: var(--brand-primary-dark);
+    background-color: var(--brand-primary-dark);
+    color: var(--brand-white);
+}
+
+.btn-outline-primary {
+    border-color: var(--brand-primary);
+    color: var(--brand-primary-dark);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+    border-color: var(--brand-primary);
+    background-color: var(--brand-primary);
+    color: var(--brand-white);
+}
+
+.btn-outline-secondary {
+    border-color: var(--brand-border);
+    color: var(--brand-text);
+}
+
+.btn-outline-secondary:hover,
+.btn-outline-secondary:focus {
+    border-color: var(--brand-primary-dark);
+    background-color: var(--brand-primary-dark);
+    color: var(--brand-white);
+}
+
+.btn-outline-danger {
+    border-color: var(--brand-danger);
+    color: var(--brand-danger);
+}
+
+.btn-outline-danger:hover,
+.btn-outline-danger:focus {
+    border-color: var(--brand-danger);
+    background-color: var(--brand-danger);
+    color: var(--brand-white);
+}
+
+.btn-outline-light {
+    border-color: rgba(255, 255, 255, 0.75);
+    color: var(--brand-white);
+}
+
+.btn-outline-light:hover,
+.btn-outline-light:focus {
+    border-color: var(--brand-white);
+    background-color: var(--brand-white);
+    color: var(--brand-primary-dark);
+}
+
+.form-control,
+.form-select {
+    border-color: var(--brand-border);
+    border-radius: 6px;
+    color: var(--brand-text);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--brand-primary);
+    box-shadow: 0 0 0 0.18rem rgba(24, 181, 229, 0.18);
+}
+
+.form-label {
+    color: var(--brand-text);
+    font-weight: 600;
+}
+
+.form-text {
+    color: var(--brand-muted);
+}
+
+.alert {
+    border: 1px solid transparent;
+    border-radius: 8px;
+    box-shadow: 0 8px 18px rgba(31, 41, 55, 0.06);
+}
+
+.alert-success {
+    border-color: #BBF7D0;
+    background-color: #F0FDF4;
+    color: var(--brand-success);
+}
+
+.alert-danger {
+    border-color: #FECACA;
+    background-color: #FEF2F2;
+    color: var(--brand-danger);
+}
+
+.alert-info {
+    border-color: var(--brand-border);
+    background-color: var(--brand-header);
+    color: var(--brand-primary-dark);
+}
+
+.badge.text-bg-success {
+    background-color: var(--brand-success) !important;
+}
+
+.badge-low-stock,
+.badge.text-bg-warning {
+    border: 1px solid #F97316;
+    background-color: #F97316 !important;
+    color: var(--brand-white) !important;
+}
+
+.product-row-low-stock > * {
+    background-color: #FFF7ED;
+}
+
+.product-row-low-stock:hover > * {
+    background-color: #FFEDD5;
+}
+
+.table {
+    color: var(--brand-text);
+}
+
+.table > :not(caption) > * > * {
+    padding: 0.95rem 1rem;
+    border-bottom-color: var(--brand-border);
+}
+
+.table thead th {
+    border-bottom-color: var(--brand-border);
+    background-color: var(--brand-header);
+    color: var(--brand-text);
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: uppercase;
+}
+
+.table-hover > tbody > tr:hover > * {
+    background-color: #F1FAFD;
+}
+
+#bill-items .qty-input {
+    min-width: 90px;
+}
+
+.product-picker {
+    position: relative;
+}
+
+.product-picker-trigger {
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.product-picker-panel {
+    position: absolute;
+    z-index: 1050;
+    top: calc(100% + 0.25rem);
+    left: 0;
+    width: min(430px, 70vw);
+    padding: 0.5rem;
+    border: 1px solid var(--brand-border);
+    border-radius: 8px;
+    background-color: var(--brand-white);
+    box-shadow: 0 12px 24px rgba(31, 41, 55, 0.10);
+}
+
+.product-picker-results {
+    max-height: 270px;
+    margin-top: 0.5rem;
+    overflow-y: auto;
+}
+
+.product-picker-option {
+    display: block;
+    width: 100%;
+    padding: 0.55rem 0.65rem;
+    border: 0;
+    border-radius: 6px;
+    background-color: transparent;
+    color: var(--brand-text);
+    text-align: left;
+}
+
+.product-picker-option:hover,
+.product-picker-option:focus,
+.product-picker-option[aria-selected="true"] {
+    background-color: var(--brand-header);
+}
+
+.product-picker-empty {
+    margin: 0;
+    padding: 0.55rem 0.65rem;
+    color: var(--brand-muted);
+}
+
+@media (min-width: 768px) {
+    .page-billing .table-responsive {
+        overflow: visible;
+    }
+}
+
+@media (max-width: 991px) {
+    .summary-card {
+        position: static;
+    }
+}

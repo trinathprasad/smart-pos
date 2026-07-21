@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}{{ sale.invoice_no }} | Local Shop Billing{% endblock %}
+{% block body_class %}page-invoice{% endblock %}
+{% block extra_css %}
+<style>
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    body {
+        background: #fff;
+    }
+}
+</style>
+{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 no-print">
+    <div>
+        <h1 class="h3 mb-1">Invoice {{ sale.invoice_no }}</h1>
+        <p class="text-muted mb-0">Generated on {{ sale.created_at|bill_datetime }}</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('billing.download_invoice', sale_id=sale.id) }}" class="btn btn-outline-primary">Download PDF</a>
+        <button type="button" class="btn btn-primary" onclick="window.print()">Print Invoice</button>
+    </div>
+</div>
+
+<div class="card invoice-card">
+    <div class="card-body p-4 p-lg-5">
+        <div class="row mb-4">
+            <div class="col-md-7">
+                <h2 class="h4 mb-1">{{ settings.shop_name }}</h2>
+                <p class="mb-1">{{ settings.address or "-" }}</p>
+                <p class="mb-0">{{ settings.phone or "" }}</p>
+            </div>
+            <div class="col-md-5 text-md-end">
+                <p class="mb-1"><strong>Invoice:</strong> {{ sale.invoice_no }}</p>
+                <p class="mb-1"><strong>Date:</strong> {{ sale.created_at|bill_datetime }}</p>
+                <p class="mb-0"><strong>Customer:</strong> {{ sale.customer_name or "Walk-in Customer" }}</p>
+                <p class="mb-1 mt-3"><strong>Payment:</strong> {{ sale.payment_status }} by {{ sale.payment_mode }}</p>
+                {% if sale.payment_reference %}
+                    <p class="mb-0"><strong>Details:</strong> {{ sale.payment_reference }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th class="text-end">Qty</th>
+                        <th class="text-end">Rate</th>
+                        <th class="text-end">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in sale.items %}
+                        <tr>
+                            <td>{{ item.product_name }}</td>
+                            <td class="text-end">{{ item.qty|quantity_with_unit(item.product.unit if item.product else "") }}</td>
+                            <td class="text-end">₹{{ "%.2f"|format(item.unit_price) }}</td>
+                            <td class="text-end">₹{{ "%.2f"|format(item.line_total) }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th colspan="3" class="text-end">Subtotal</th>
+                        <th class="text-end">₹{{ "%.2f"|format(sale.subtotal) }}</th>
+                    </tr>
+                    <tr>
+                        <th colspan="3" class="text-end">Tax</th>
+                        <th class="text-end">₹{{ "%.2f"|format(sale.tax_amount) }}</th>
+                    </tr>
+                    <tr>
+                        <th colspan="3" class="text-end">Grand Total</th>
+                        <th class="text-end">₹{{ "%.2f"|format(sale.grand_total) }}</th>
+                    </tr>
+                    {% if sale.previous_pending_amount > 0 %}
+                    <tr>
+                        <th colspan="3" class="text-end">Previous Pending Amount</th>
+                        <th class="text-end">Rs {{ "%.2f"|format(sale.previous_pending_amount) }}</th>
+                    </tr>
+                    <tr>
+                        <th colspan="3" class="text-end">Total Payable</th>
+                        <th class="text-end">Rs {{ "%.2f"|format(sale.total_payable) }}</th>
+                    </tr>
+                    {% endif %}
+                    <tr>
+                        <th colspan="3" class="text-end">Paid</th>
+                        <th class="text-end">Rs {{ "%.2f"|format(sale.paid_amount) }}</th>
+                    </tr>
+                    <tr>
+                        <th colspan="3" class="text-end">Balance Due</th>
+                        <th class="text-end">Rs {{ "%.2f"|format(sale.balance_due) }}</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <p class="text-center text-muted mt-4 mb-0">{{ settings.footer_note }}</p>
+    </div>
+</div>
+{% endblock %}

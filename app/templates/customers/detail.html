@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}{{ customer.name }} | Customers{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-1">{{ customer.name }}</h1>
+        <p class="text-muted mb-0">{{ customer.phone or "No phone" }}{% if customer.address %} | {{ customer.address }}{% endif %}</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('customers.edit', customer_id=customer.id) }}" class="btn btn-outline-secondary">Edit</a>
+        <form action="{{ url_for('customers.delete', customer_id=customer.id) }}" method="post">
+            <button class="btn btn-outline-danger" onclick="return confirm('Remove this customer?')">Delete</button>
+        </form>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <p class="text-muted mb-2">Current Pending Balance</p>
+                <h2 class="mb-0">Rs {{ "%.2f"|format(balance) }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body">
+                <form action="{{ url_for('customers.add_ledger_entry', customer_id=customer.id) }}" method="post" class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label">Action</label>
+                        <select class="form-select" name="entry_type" id="ledger-action">
+                            <option value="manual_due">Add Pending</option>
+                            <option value="payment">Receive Payment</option>
+                            <option value="clear_balance">Clear Pending</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Amount</label>
+                        <input type="number" class="form-control" name="amount" id="ledger-amount" min="0.01" step="0.01">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Note</label>
+                        <input type="text" class="form-control" name="note" placeholder="Optional">
+                    </div>
+                    <div class="col-md-2 d-grid">
+                        <button class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header"><h5 class="mb-0">Balance History</h5></div>
+    <div class="table-responsive">
+        <table class="table align-middle mb-0">
+            <thead><tr><th>Date</th><th>Type</th><th>Note</th><th class="text-end">Added</th><th class="text-end">Received</th></tr></thead>
+            <tbody>
+                {% for entry in entries %}
+                    <tr>
+                        <td>{{ entry.created_at|bill_datetime }}</td>
+                        <td>{{ entry.entry_type.replace('_', ' ').title() }}</td>
+                        <td>{% if entry.sale %}<a href="{{ url_for('billing.view_sale', sale_id=entry.sale.id) }}">{{ entry.note }}</a>{% else %}{{ entry.note or "-" }}{% endif %}</td>
+                        <td class="text-end">{% if entry.debit_amount %}Rs {{ "%.2f"|format(entry.debit_amount) }}{% else %}-{% endif %}</td>
+                        <td class="text-end">{% if entry.credit_amount %}Rs {{ "%.2f"|format(entry.credit_amount) }}{% else %}-{% endif %}</td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="5" class="text-center py-4 text-muted">No balance history yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header"><h5 class="mb-0">Bill History</h5></div>
+    <div class="table-responsive">
+        <table class="table align-middle mb-0">
+            <thead><tr><th>Invoice</th><th>Date</th><th>Payment Status</th><th class="text-end">Total</th><th></th></tr></thead>
+            <tbody>
+                {% for sale in sales %}
+                    <tr>
+                        <td>{{ sale.invoice_no }}</td>
+                        <td>{{ sale.created_at|bill_datetime }}</td>
+                        <td>{{ sale.payment_status }}</td>
+                        <td class="text-end">Rs {{ "%.2f"|format(sale.total_payable) }}</td>
+                        <td class="text-end"><a href="{{ url_for('billing.view_sale', sale_id=sale.id) }}" class="btn btn-sm btn-outline-primary">View</a></td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="5" class="text-center py-4 text-muted">No bills for this customer yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const ledgerAction = document.getElementById("ledger-action");
+    const ledgerAmount = document.getElementById("ledger-amount");
+
+    function updateLedgerAmount() {
+        const clearing = ledgerAction.value === "clear_balance";
+        ledgerAmount.disabled = clearing;
+        ledgerAmount.required = !clearing;
+        if (clearing) ledgerAmount.value = "";
+    }
+
+    ledgerAction.addEventListener("change", updateLedgerAmount);
+    updateLedgerAmount();
+</script>
+{% endblock %}

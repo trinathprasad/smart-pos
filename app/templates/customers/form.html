@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}{{ "Edit Customer" if customer else "Add Customer" }} | Local Shop Billing{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">{{ "Edit Customer" if customer else "Add Customer" }}</h1>
+    <a href="{{ url_for('customers.detail', customer_id=customer.id) if customer else url_for('customers.index') }}" class="btn btn-outline-secondary">Cancel</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="post" class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Customer Name</label>
+                <input
+                    type="text"
+                    class="form-control"
+                    name="name"
+                    value="{{ form_data.name if form_data is defined else (customer.name if customer else '') }}"
+                    pattern="[A-Za-z ]+"
+                    title="Use characters only."
+                    required
+                    autofocus
+                >
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Contact</label>
+                <input
+                    type="tel"
+                    class="form-control"
+                    name="phone"
+                    value="{{ form_data.phone if form_data is defined and form_data.phone else (customer.phone if customer and customer.phone else '') }}"
+                    pattern="[0-9]{10}"
+                    maxlength="10"
+                    inputmode="numeric"
+                    title="Enter a 10 digit contact number."
+                    required
+                >
+            </div>
+            <div class="col-12">
+                <label class="form-label">Address</label>
+                <textarea class="form-control" name="address" rows="3">{{ form_data.address if form_data is defined and form_data.address else (customer.address if customer and customer.address else '') }}</textarea>
+            </div>
+            <div class="col-12">
+                <button class="btn btn-primary">{{ "Save Changes" if customer else "Add Customer" }}</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

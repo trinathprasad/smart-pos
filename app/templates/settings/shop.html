@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Shop Settings | Local Shop Billing{% endblock %}
+{% block body_class %}page-settings{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body p-4">
+                <h1 class="h3 mb-4">Shop Settings</h1>
+                <form method="post" class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Shop Name</label>
+                        <input type="text" name="shop_name" class="form-control" value="{{ settings.shop_name }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Phone</label>
+                        <input type="text" name="phone" class="form-control" value="{{ settings.phone or '' }}">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Address</label>
+                        <textarea name="address" class="form-control" rows="2">{{ settings.address or '' }}</textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Invoice Prefix</label>
+                        <input type="text" name="invoice_prefix" class="form-control" value="{{ settings.invoice_prefix }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Tax Percent</label>
+                        <input type="number" name="tax_percent" step="0.01" min="0" class="form-control" value="{{ settings.tax_percent }}" required>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Invoice Footer Note</label>
+                        <textarea name="footer_note" class="form-control" rows="2">{{ settings.footer_note }}</textarea>
+                    </div>
+                    <div class="col-12">
+                        <button class="btn btn-primary">Save Settings</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
