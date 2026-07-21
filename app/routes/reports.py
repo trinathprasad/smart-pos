@@ -42,6 +42,10 @@ def daily():
     total_sales = sum((sale.grand_total for sale in sales), start=Decimal("0.00"))
     total_tax = sum((sale.tax_amount for sale in sales), start=Decimal("0.00"))
     total_due = sum((sale.balance_due for sale in sales), start=Decimal("0.00"))
+    total_profit = sum(
+        (item.line_profit for sale in sales for item in sale.items),
+        start=Decimal("0.00"),
+    )
     return render_template(
         "reports/daily.html",
         sales=sales,
@@ -49,6 +53,7 @@ def daily():
         total_sales=total_sales,
         total_tax=total_tax,
         total_due=total_due,
+        total_profit=total_profit,
         top_items=top_items,
     )
 

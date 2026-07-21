@@ -40,7 +40,7 @@
                         <td>{{ customer.name }}</td>
                         <td>{{ customer.phone or "-" }}</td>
                         <td>{{ customer.address or "-" }}</td>
-                        <td class="text-end">Rs {{ "%.2f"|format(balances[customer.id]) }}</td>
+                        <td class="text-end">&#8377;{{ "%.2f"|format(balances[customer.id]) }}</td>
                         <td class="text-end"><a href="{{ url_for('customers.detail', customer_id=customer.id) }}" class="btn btn-sm btn-outline-primary">View</a></td>
                     </tr>
                 {% else %}

@@ -17,7 +17,7 @@
 </div>
 
 <div class="row g-4 mb-4">
-    <div class="col-md-3">
+    <div class="col-md-3 col-lg">
         <div class="card stat-card">
             <div class="card-body">
                 <p class="text-muted mb-2">Bills</p>
@@ -25,7 +25,7 @@
             </div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-3 col-lg">
         <div class="card stat-card">
             <div class="card-body">
                 <p class="text-muted mb-2">Total Sales</p>
@@ -33,7 +33,7 @@
             </div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-3 col-lg">
         <div class="card stat-card">
             <div class="card-body">
                 <p class="text-muted mb-2">Tax Collected</p>
@@ -41,11 +41,19 @@
             </div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-3 col-lg">
         <div class="card stat-card">
             <div class="card-body">
                 <p class="text-muted mb-2">Balance Due</p>
-                <h2 class="mb-0">Rs {{ "%.2f"|format(total_due) }}</h2>
+                <h2 class="mb-0">&#8377;{{ "%.2f"|format(total_due) }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-lg">
+        <div class="card stat-card">
+            <div class="card-body">
+                <p class="text-muted mb-2">Profit</p>
+                <h2 class="mb-0">&#8377;{{ "%.2f"|format(total_profit) }}</h2>
             </div>
         </div>
     </div>
@@ -76,7 +84,7 @@
                                 <td>{{ sale.customer_name or "Walk-in" }}</td>
                                 <td>{{ sale.payment_mode }}</td>
                                 <td>{{ sale.payment_status }}</td>
-                                <td>Rs {{ "%.2f"|format(sale.balance_due) }}</td>
+                                <td>&#8377;{{ "%.2f"|format(sale.balance_due) }}</td>
                                 <td>₹{{ "%.2f"|format(sale.grand_total) }}</td>
                             </tr>
                         {% else %}

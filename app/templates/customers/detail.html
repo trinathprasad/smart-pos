@@ -19,7 +19,7 @@
         <div class="card h-100">
             <div class="card-body">
                 <p class="text-muted mb-2">Current Pending Balance</p>
-                <h2 class="mb-0">Rs {{ "%.2f"|format(balance) }}</h2>
+                <h2 class="mb-0">&#8377;{{ "%.2f"|format(balance) }}</h2>
             </div>
         </div>
     </div>
@@ -63,8 +63,8 @@
                         <td>{{ entry.created_at|bill_datetime }}</td>
                         <td>{{ entry.entry_type.replace('_', ' ').title() }}</td>
                         <td>{% if entry.sale %}<a href="{{ url_for('billing.view_sale', sale_id=entry.sale.id) }}">{{ entry.note }}</a>{% else %}{{ entry.note or "-" }}{% endif %}</td>
-                        <td class="text-end">{% if entry.debit_amount %}Rs {{ "%.2f"|format(entry.debit_amount) }}{% else %}-{% endif %}</td>
-                        <td class="text-end">{% if entry.credit_amount %}Rs {{ "%.2f"|format(entry.credit_amount) }}{% else %}-{% endif %}</td>
+                        <td class="text-end">{% if entry.debit_amount %}&#8377;{{ "%.2f"|format(entry.debit_amount) }}{% else %}-{% endif %}</td>
+                        <td class="text-end">{% if entry.credit_amount %}&#8377;{{ "%.2f"|format(entry.credit_amount) }}{% else %}-{% endif %}</td>
                     </tr>
                 {% else %}
                     <tr><td colspan="5" class="text-center py-4 text-muted">No balance history yet.</td></tr>
@@ -85,7 +85,7 @@
                         <td>{{ sale.invoice_no }}</td>
                         <td>{{ sale.created_at|bill_datetime }}</td>
                         <td>{{ sale.payment_status }}</td>
-                        <td class="text-end">Rs {{ "%.2f"|format(sale.total_payable) }}</td>
+                        <td class="text-end">&#8377;{{ "%.2f"|format(sale.total_payable) }}</td>
                         <td class="text-end"><a href="{{ url_for('billing.view_sale', sale_id=sale.id) }}" class="btn btn-sm btn-outline-primary">View</a></td>
                     </tr>
                 {% else %}
