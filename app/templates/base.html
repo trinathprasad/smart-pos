@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}Local Shop Billing{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap-icons/font/bootstrap-icons.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     {% block extra_css %}{% endblock %}
 </head>
@@ -12,7 +13,7 @@
     <header class="app-top-header">
         <div class="container-fluid app-shell-container">
             <a class="app-brand" href="{{ url_for('main.index') }}">
-                <span class="app-logo-placeholder" aria-hidden="true"></span>
+                <i class="bi bi-shop me-2" aria-hidden="true"></i>
                 <span>Smart Store Billing</span>
             </a>
             {% if session.get("admin_logged_in") %}
@@ -22,7 +23,7 @@
                         <label class="form-check-label" for="darkModeToggle">Dark Mode</label>
                     </div>
                     <a class="app-settings-link" href="{{ url_for('settings.shop') }}">
-                        <span class="app-action-placeholder" aria-hidden="true"></span>
+                        <i class="bi bi-gear me-2" aria-hidden="true"></i>
                         <span>Shop Settings</span>
                     </a>
                 </div>
@@ -38,11 +39,36 @@
                 </button>
                 <div class="collapse navbar-collapse" id="mainNav">
                     <ul class="navbar-nav mx-auto align-items-lg-center">
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('main.index') }}">Dashboard</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('products.index') }}">Products</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('customers.index') }}">Customers</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('billing.new_bill') }}">New Bill</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('reports.daily') }}">Daily Reports</a></li>
+                        <li class="nav-item">
+                            <a class="nav-link d-flex align-items-center" href="{{ url_for('main.index') }}">
+                                <i class="bi bi-grid me-2" aria-hidden="true"></i>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link d-flex align-items-center" href="{{ url_for('products.index') }}">
+                                <i class="bi bi-box-seam me-2" aria-hidden="true"></i>
+                                <span>Products</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link d-flex align-items-center" href="{{ url_for('customers.index') }}">
+                                <i class="bi bi-people me-2" aria-hidden="true"></i>
+                                <span>Customers</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link d-flex align-items-center" href="{{ url_for('billing.new_bill') }}">
+                                <i class="bi bi-receipt-cutoff me-2" aria-hidden="true"></i>
+                                <span>New Bill</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link d-flex align-items-center" href="{{ url_for('reports.daily') }}">
+                                <i class="bi bi-file-earmark-spreadsheet me-2" aria-hidden="true"></i>
+                                <span>Daily Reports</span>
+                            </a>
+                        </li>
                         <li class="nav-item ms-lg-2">
                             <form action="{{ url_for('auth.logout') }}" method="post">
                                 <button class="btn btn-sm btn-outline-light">Logout</button>
@@ -59,23 +85,23 @@
             <aside class="app-sidebar" aria-label="Main sidebar">
                 <nav class="app-sidebar-nav">
                     <div class="app-sidebar-link">
-                        <span class="sidebar-icon-placeholder" aria-hidden="true"></span>
+                        <i class="bi bi-grid-3x3-gap me-2" aria-hidden="true"></i>
                         <span>Categories</span>
                     </div>
                     <div class="app-sidebar-link">
-                        <span class="sidebar-icon-placeholder" aria-hidden="true"></span>
+                        <i class="bi bi-lightning-charge me-2" aria-hidden="true"></i>
                         <span>Quick Actions</span>
                     </div>
                     <div class="app-sidebar-link">
-                        <span class="sidebar-icon-placeholder" aria-hidden="true"></span>
+                        <i class="bi bi-boxes me-2" aria-hidden="true"></i>
                         <span>Inventory</span>
                     </div>
                     <div class="app-sidebar-link">
-                        <span class="sidebar-icon-placeholder" aria-hidden="true"></span>
+                        <i class="bi bi-question-circle me-2" aria-hidden="true"></i>
                         <span>Help</span>
                     </div>
                     <div class="app-sidebar-link">
-                        <span class="sidebar-icon-placeholder" aria-hidden="true"></span>
+                        <i class="bi bi-file-earmark-spreadsheet me-2" aria-hidden="true"></i>
                         <span>Reports</span>
                     </div>
                 </nav>
