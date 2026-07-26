@@ -11,6 +11,7 @@
 </head>
 <body class="{% block body_class %}page-default{% endblock %}">
     {% set show_app_shell = not config.get("AUTH_REQUIRED", False) or session.get("admin_logged_in") %}
+    {% set active_section = request.endpoint.split('.')[0] if request.endpoint else '' %}
     <header class="app-top-header">
         <div class="container-fluid app-shell-container">
             <a class="app-brand" href="{{ url_for('main.index') }}">
@@ -23,7 +24,7 @@
                         <input class="form-check-input" type="checkbox" role="switch" id="darkModeToggle">
                         <label class="form-check-label" for="darkModeToggle">Dark Mode</label>
                     </div>
-                    <a class="app-settings-link" href="{{ url_for('settings.shop') }}">
+                    <a class="app-settings-link{% if active_section == 'settings' %} active{% endif %}" href="{{ url_for('settings.shop') }}" data-header-nav-item="settings"{% if active_section == 'settings' %} aria-current="page"{% endif %}>
                         <i class="bi bi-gear me-2" aria-hidden="true"></i>
                         <span>Shop Settings</span>
                     </a>
@@ -41,31 +42,31 @@
                 <div class="collapse navbar-collapse" id="mainNav">
                     <ul class="navbar-nav mx-auto align-items-lg-center">
                         <li class="nav-item">
-                            <a class="nav-link d-flex align-items-center" href="{{ url_for('main.index') }}">
+                            <a class="nav-link d-flex align-items-center{% if active_section == 'main' %} active{% endif %}" href="{{ url_for('main.index') }}" data-top-nav-item="main"{% if active_section == 'main' %} aria-current="page"{% endif %}>
                                 <i class="bi bi-grid me-2" aria-hidden="true"></i>
                                 <span>Dashboard</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link d-flex align-items-center" href="{{ url_for('products.index') }}">
+                            <a class="nav-link d-flex align-items-center{% if active_section == 'products' %} active{% endif %}" href="{{ url_for('products.index') }}" data-top-nav-item="products"{% if active_section == 'products' %} aria-current="page"{% endif %}>
                                 <i class="bi bi-box-seam me-2" aria-hidden="true"></i>
                                 <span>Products</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link d-flex align-items-center" href="{{ url_for('customers.index') }}">
+                            <a class="nav-link d-flex align-items-center{% if active_section == 'customers' %} active{% endif %}" href="{{ url_for('customers.index') }}" data-top-nav-item="customers"{% if active_section == 'customers' %} aria-current="page"{% endif %}>
                                 <i class="bi bi-people me-2" aria-hidden="true"></i>
                                 <span>Customers</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link d-flex align-items-center" href="{{ url_for('billing.new_bill') }}">
+                            <a class="nav-link d-flex align-items-center{% if active_section == 'billing' %} active{% endif %}" href="{{ url_for('billing.new_bill') }}" data-top-nav-item="billing"{% if active_section == 'billing' %} aria-current="page"{% endif %}>
                                 <i class="bi bi-receipt-cutoff me-2" aria-hidden="true"></i>
                                 <span>New Bill</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link d-flex align-items-center" href="{{ url_for('reports.daily') }}">
+                            <a class="nav-link d-flex align-items-center{% if active_section == 'reports' %} active{% endif %}" href="{{ url_for('reports.daily') }}" data-top-nav-item="reports"{% if active_section == 'reports' %} aria-current="page"{% endif %}>
                                 <i class="bi bi-file-earmark-spreadsheet me-2" aria-hidden="true"></i>
                                 <span>Daily Reports</span>
                             </a>
@@ -80,24 +81,24 @@
         <div class="app-layout">
             <aside class="app-sidebar" aria-label="Main sidebar">
                 <nav class="app-sidebar-nav">
-                    <div class="app-sidebar-link">
-                        <i class="bi bi-grid-3x3-gap me-2" aria-hidden="true"></i>
+                    <div class="app-sidebar-link" role="button" tabindex="0" data-sidebar-item="categories">
+                        <i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>
                         <span>Categories</span>
                     </div>
-                    <div class="app-sidebar-link">
-                        <i class="bi bi-lightning-charge me-2" aria-hidden="true"></i>
+                    <div class="app-sidebar-link" role="button" tabindex="0" data-sidebar-item="quick-actions">
+                        <i class="bi bi-lightning-charge" aria-hidden="true"></i>
                         <span>Quick Actions</span>
                     </div>
-                    <div class="app-sidebar-link">
-                        <i class="bi bi-boxes me-2" aria-hidden="true"></i>
+                    <div class="app-sidebar-link" role="button" tabindex="0" data-sidebar-item="inventory">
+                        <i class="bi bi-boxes" aria-hidden="true"></i>
                         <span>Inventory</span>
                     </div>
-                    <div class="app-sidebar-link">
-                        <i class="bi bi-question-circle me-2" aria-hidden="true"></i>
+                    <div class="app-sidebar-link" role="button" tabindex="0" data-sidebar-item="help">
+                        <i class="bi bi-question-circle" aria-hidden="true"></i>
                         <span>Help</span>
                     </div>
-                    <div class="app-sidebar-link">
-                        <i class="bi bi-file-earmark-spreadsheet me-2" aria-hidden="true"></i>
+                    <div class="app-sidebar-link" role="button" tabindex="0" data-sidebar-item="reports">
+                        <i class="bi bi-file-earmark-spreadsheet" aria-hidden="true"></i>
                         <span>Reports</span>
                     </div>
                 </nav>
@@ -132,6 +133,7 @@
     {% endif %}
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/navigation.js') }}"></script>
     {% block scripts %}{% endblock %}
 </body>
 </html>
