@@ -17,6 +17,9 @@ def create_app(config_class=Config):
 
     @app.before_request
     def require_admin_login():
+        if not app.config.get("AUTH_REQUIRED", False):
+            return None
+
         public_endpoints = {"auth.login", "static"}
         if request.endpoint in public_endpoints or session.get("admin_logged_in"):
             return None
