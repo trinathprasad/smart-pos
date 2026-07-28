@@ -3,6 +3,15 @@ const activeSidebarKey = "smartStoreActiveSidebarItem";
 const headerNavItems = document.querySelectorAll("[data-header-nav-item]");
 const topNavItems = document.querySelectorAll("[data-top-nav-item]");
 const sidebarItems = document.querySelectorAll("[data-sidebar-item]");
+const appNavbar = document.querySelector(".app-navbar");
+
+function updateAppNavbarHeight() {
+    if (!appNavbar) {
+        return;
+    }
+
+    document.documentElement.style.setProperty("--app-navbar-height", `${appNavbar.offsetHeight}px`);
+}
 
 function clearHeaderNavItems() {
     headerNavItems.forEach((item) => {
@@ -122,3 +131,12 @@ sidebarItems.forEach((item) => {
         }
     });
 });
+
+updateAppNavbarHeight();
+window.addEventListener("load", updateAppNavbarHeight);
+window.addEventListener("resize", updateAppNavbarHeight);
+
+if (appNavbar) {
+    appNavbar.addEventListener("shown.bs.collapse", updateAppNavbarHeight);
+    appNavbar.addEventListener("hidden.bs.collapse", updateAppNavbarHeight);
+}
