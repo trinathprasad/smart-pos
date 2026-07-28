@@ -1,11 +1,13 @@
 const activeNavigationKey = "smartStoreActiveNavigation";
 const activeSidebarKey = "smartStoreActiveSidebarItem";
 const sidebarCollapsedKey = "smartStoreSidebarCollapsed";
+const themeStorageKey = "smartStoreTheme";
 const headerNavItems = document.querySelectorAll("[data-header-nav-item]");
 const topNavItems = document.querySelectorAll("[data-top-nav-item]");
 const sidebarItems = document.querySelectorAll("[data-sidebar-item]");
 const appNavbar = document.querySelector(".app-navbar");
 const sidebarToggle = document.querySelector("[data-sidebar-toggle]");
+const darkModeToggle = document.getElementById("darkModeToggle");
 const sidebarTooltips = [];
 
 function updateAppNavbarHeight() {
@@ -14,6 +16,16 @@ function updateAppNavbarHeight() {
     }
 
     document.documentElement.style.setProperty("--app-navbar-height", `${appNavbar.offsetHeight}px`);
+}
+
+function applyTheme(theme) {
+    const normalizedTheme = theme === "dark" ? "dark" : "light";
+    document.documentElement.setAttribute("data-theme", normalizedTheme);
+    localStorage.setItem(themeStorageKey, normalizedTheme);
+
+    if (darkModeToggle) {
+        darkModeToggle.checked = normalizedTheme === "dark";
+    }
 }
 
 function setSidebarCollapsed(isCollapsed) {
@@ -169,10 +181,17 @@ sidebarItems.forEach((item) => {
 
 initializeSidebarTooltips();
 setSidebarCollapsed(localStorage.getItem(sidebarCollapsedKey) === "true");
+applyTheme(localStorage.getItem(themeStorageKey) || document.documentElement.getAttribute("data-theme"));
 
 if (sidebarToggle) {
     sidebarToggle.addEventListener("click", () => {
         setSidebarCollapsed(!document.body.classList.contains("is-sidebar-collapsed"));
+    });
+}
+
+if (darkModeToggle) {
+    darkModeToggle.addEventListener("change", () => {
+        applyTheme(darkModeToggle.checked ? "dark" : "light");
     });
 }
 

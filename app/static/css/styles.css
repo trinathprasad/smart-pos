@@ -9,10 +9,65 @@
     --brand-header: #EAF8FC;
     --brand-danger: #DC2626;
     --brand-success: #15803D;
+    --brand-surface: #FFFFFF;
+    --brand-top-header-bg: #FFFFFF;
+    --brand-sidebar-bg: #FFFFFF;
+    --brand-input-bg: #FFFFFF;
+    --brand-table-hover: #F1FAFD;
+    --brand-low-stock-bg: #FFF7ED;
+    --brand-low-stock-hover-bg: #FFEDD5;
+    --brand-warning: #F97316;
+    --brand-success-bg: #F0FDF4;
+    --brand-success-border: #BBF7D0;
+    --brand-danger-bg: #FEF2F2;
+    --brand-danger-border: #FECACA;
+    --brand-top-header-shadow: 0 8px 18px rgba(31, 41, 55, 0.05);
+    --brand-card-shadow: 0 10px 24px rgba(31, 41, 55, 0.07);
+    --brand-popover-shadow: 0 12px 24px rgba(31, 41, 55, 0.10);
+    --brand-settings-active-shadow: 0 6px 14px rgba(10, 142, 194, 0.18);
+    --brand-nav-active-shadow: 0 6px 14px rgba(10, 142, 194, 0.24);
+    --brand-sidebar-active-shadow: 0 8px 16px rgba(10, 142, 194, 0.24);
+    --brand-focus-shadow: 0 0 0 0.18rem rgba(24, 181, 229, 0.18);
+    --brand-nav-link-color: rgba(255, 255, 255, 0.88);
+    --brand-nav-hover-bg: rgba(234, 248, 252, 0.22);
+    --brand-toggler-border: rgba(255, 255, 255, 0.45);
+    --brand-outline-light-border: rgba(255, 255, 255, 0.75);
     --app-navbar-height: 44px;
     --app-sidebar-width: 240px;
     --app-sidebar-expanded-width: 240px;
     --app-sidebar-collapsed-width: 72px;
+}
+
+[data-theme="dark"] {
+    --brand-primary: #18B5E5;
+    --brand-primary-dark: #087EAD;
+    --brand-background: #111827;
+    --brand-text: #F9FAFB;
+    --brand-muted: #CBD5E1;
+    --brand-border: #374151;
+    --brand-header: #1F2937;
+    --brand-danger: #F87171;
+    --brand-success: #34D399;
+    --brand-surface: #1F2937;
+    --brand-top-header-bg: #0F172A;
+    --brand-sidebar-bg: #111827;
+    --brand-input-bg: #111827;
+    --brand-table-hover: #243244;
+    --brand-low-stock-bg: #3A2A1D;
+    --brand-low-stock-hover-bg: #46311F;
+    --brand-warning: #FB923C;
+    --brand-success-bg: #052E1A;
+    --brand-success-border: #166534;
+    --brand-danger-bg: #3B1218;
+    --brand-danger-border: #7F1D1D;
+    --brand-top-header-shadow: 0 8px 18px rgba(0, 0, 0, 0.22);
+    --brand-card-shadow: 0 10px 24px rgba(0, 0, 0, 0.24);
+    --brand-popover-shadow: 0 12px 24px rgba(0, 0, 0, 0.32);
+    --brand-settings-active-shadow: 0 6px 14px rgba(24, 181, 229, 0.2);
+    --brand-nav-active-shadow: 0 6px 14px rgba(0, 0, 0, 0.22);
+    --brand-sidebar-active-shadow: 0 8px 16px rgba(0, 0, 0, 0.26);
+    --brand-focus-shadow: 0 0 0 0.18rem rgba(24, 181, 229, 0.28);
+    color-scheme: dark;
 }
 
 body.is-sidebar-collapsed {
@@ -25,6 +80,40 @@ body {
     color: var(--brand-text);
 }
 
+body,
+.app-top-header,
+.app-brand,
+.app-header-actions,
+.app-settings-link,
+.navbar,
+.app-navbar .nav-link,
+.app-sidebar,
+.app-sidebar-header,
+.app-sidebar-toggle,
+.app-sidebar-link,
+.stat-card,
+.summary-card,
+.invoice-card,
+.card,
+.card-header,
+.btn,
+.form-control,
+.form-select,
+.alert,
+.table,
+.table > :not(caption) > * > *,
+.table thead th,
+.product-picker-panel,
+.product-picker-option {
+    transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+[data-theme="dark"] body {
+    --bs-body-bg: var(--brand-background);
+    --bs-body-color: var(--brand-text);
+    --bs-border-color: var(--brand-border);
+}
+
 .app-shell-container {
     max-width: 100%;
     padding-right: 1.5rem;
@@ -34,8 +123,8 @@ body {
 .app-top-header {
     min-height: 72px;
     border-bottom: 1px solid var(--brand-border);
-    background-color: var(--brand-white);
-    box-shadow: 0 8px 18px rgba(31, 41, 55, 0.05);
+    background-color: var(--brand-top-header-bg);
+    box-shadow: var(--brand-top-header-shadow);
 }
 
 .app-top-header .app-shell-container {
@@ -87,6 +176,19 @@ body {
 .app-dark-mode-toggle .form-check-input {
     margin-top: 0;
     cursor: pointer;
+    border-color: var(--brand-border);
+    background-color: var(--brand-input-bg);
+    transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.app-dark-mode-toggle .form-check-input:checked {
+    border-color: var(--brand-primary-dark);
+    background-color: var(--brand-primary-dark);
+}
+
+.app-dark-mode-toggle .form-check-input:focus {
+    border-color: var(--brand-primary);
+    box-shadow: var(--brand-focus-shadow);
 }
 
 .app-settings-link {
@@ -99,7 +201,7 @@ body {
     color: var(--brand-text);
     font-weight: 600;
     text-decoration: none;
-    transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+    transition: background-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
 }
 
 .app-settings-link:not(.active):hover,
@@ -114,7 +216,7 @@ body {
 .app-settings-link.active:focus {
     background-color: var(--brand-primary-dark);
     color: var(--brand-white);
-    box-shadow: 0 6px 14px rgba(10, 142, 194, 0.18);
+    box-shadow: var(--brand-settings-active-shadow);
 }
 
 .app-settings-link.active .bi {
@@ -171,12 +273,12 @@ h6 {
     padding-top: 0.35rem !important;
     padding-bottom: 0.35rem !important;
     border-radius: 8px;
-    transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+    transition: background-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
 }
 
 .app-navbar .bi {
     line-height: 1;
-    transition: color 0.2s ease;
+    transition: color 0.25s ease;
 }
 
 .navbar-brand {
@@ -185,13 +287,13 @@ h6 {
 }
 
 .navbar-dark .navbar-nav .nav-link {
-    color: rgba(255, 255, 255, 0.88);
+    color: var(--brand-nav-link-color);
     font-weight: 600;
 }
 
 .navbar-dark .navbar-nav .nav-link:not(.active):hover,
 .navbar-dark .navbar-nav .nav-link:not(.active):focus {
-    background-color: rgba(234, 248, 252, 0.22);
+    background-color: var(--brand-nav-hover-bg);
     color: var(--brand-white);
     cursor: pointer;
 }
@@ -201,7 +303,7 @@ h6 {
 .navbar-dark .navbar-nav .nav-link.active:focus {
     background-color: var(--brand-primary-dark);
     color: var(--brand-white);
-    box-shadow: 0 6px 14px rgba(10, 142, 194, 0.24);
+    box-shadow: var(--brand-nav-active-shadow);
 }
 
 .navbar-dark .navbar-nav .nav-link.active .bi {
@@ -209,7 +311,7 @@ h6 {
 }
 
 .navbar-dark .navbar-toggler {
-    border-color: rgba(255, 255, 255, 0.45);
+    border-color: var(--brand-toggler-border);
 }
 
 .app-layout {
@@ -229,11 +331,11 @@ h6 {
     padding: 0;
     overflow-y: auto;
     border: 0;
-    border-right-color: #C6DFEA;
+    border-right-color: var(--brand-border);
     border-right-style: solid;
     border-right-width: 1px;
     border-radius: 0;
-    background-color: var(--brand-white);
+    background-color: var(--brand-sidebar-bg);
     box-shadow: none;
     transition: width 250ms ease;
 }
@@ -258,11 +360,11 @@ h6 {
     padding: 0;
     border: 1px solid var(--brand-border);
     border-radius: 8px;
-    background-color: var(--brand-white);
+    background-color: var(--brand-surface);
     color: var(--brand-primary-dark);
     cursor: pointer;
     line-height: 1;
-    transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+    transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
 .app-sidebar-toggle:hover,
@@ -296,7 +398,7 @@ h6 {
     font-weight: 600;
     text-decoration: none;
     white-space: nowrap;
-    transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, padding 250ms ease, gap 250ms ease;
+    transition: background-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease, padding 250ms ease, gap 250ms ease;
 }
 
 .app-sidebar-link span {
@@ -317,7 +419,7 @@ h6 {
 .app-sidebar-link.active:focus {
     background-color: var(--brand-primary-dark);
     color: var(--brand-white);
-    box-shadow: 0 8px 16px rgba(10, 142, 194, 0.24);
+    box-shadow: var(--brand-sidebar-active-shadow);
 }
 
 .app-sidebar-link .bi {
@@ -326,7 +428,7 @@ h6 {
     color: var(--brand-primary-dark);
     line-height: 1;
     text-align: center;
-    transition: color 0.2s ease;
+    transition: color 0.25s ease;
 }
 
 .app-sidebar-link.active .bi {
@@ -387,13 +489,13 @@ body.is-sidebar-collapsed .app-sidebar-link .bi {
 .card {
     border: 1px solid var(--brand-border);
     border-radius: 8px;
-    background-color: var(--brand-white);
-    box-shadow: 0 10px 24px rgba(31, 41, 55, 0.07);
+    background-color: var(--brand-surface);
+    box-shadow: var(--brand-card-shadow);
 }
 
 .card-header {
     border-bottom-color: var(--brand-border);
-    background-color: var(--brand-white);
+    background-color: var(--brand-surface);
     color: var(--brand-text);
     font-weight: 700;
 }
@@ -459,7 +561,7 @@ body.is-sidebar-collapsed .app-sidebar-link .bi {
 }
 
 .btn-outline-light {
-    border-color: rgba(255, 255, 255, 0.75);
+    border-color: var(--brand-outline-light-border);
     color: var(--brand-white);
 }
 
@@ -474,13 +576,34 @@ body.is-sidebar-collapsed .app-sidebar-link .bi {
 .form-select {
     border-color: var(--brand-border);
     border-radius: 6px;
+    background-color: var(--brand-input-bg);
+    color: var(--brand-text);
+}
+
+.form-control:disabled,
+.form-select:disabled {
+    border-color: var(--brand-border);
+    background-color: var(--brand-header);
+    color: var(--brand-muted);
+    opacity: 1;
+}
+
+.form-control::placeholder {
+    color: var(--brand-muted);
+    opacity: 1;
+}
+
+.form-select option {
+    background-color: var(--brand-input-bg);
     color: var(--brand-text);
 }
 
 .form-control:focus,
 .form-select:focus {
     border-color: var(--brand-primary);
-    box-shadow: 0 0 0 0.18rem rgba(24, 181, 229, 0.18);
+    background-color: var(--brand-input-bg);
+    color: var(--brand-text);
+    box-shadow: var(--brand-focus-shadow);
 }
 
 .form-label {
@@ -495,18 +618,22 @@ body.is-sidebar-collapsed .app-sidebar-link .bi {
 .alert {
     border: 1px solid transparent;
     border-radius: 8px;
-    box-shadow: 0 8px 18px rgba(31, 41, 55, 0.06);
+    box-shadow: var(--brand-top-header-shadow);
+}
+
+[data-theme="dark"] .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
 }
 
 .alert-success {
-    border-color: #BBF7D0;
-    background-color: #F0FDF4;
+    border-color: var(--brand-success-border);
+    background-color: var(--brand-success-bg);
     color: var(--brand-success);
 }
 
 .alert-danger {
-    border-color: #FECACA;
-    background-color: #FEF2F2;
+    border-color: var(--brand-danger-border);
+    background-color: var(--brand-danger-bg);
     color: var(--brand-danger);
 }
 
@@ -522,26 +649,31 @@ body.is-sidebar-collapsed .app-sidebar-link .bi {
 
 .badge-low-stock,
 .badge.text-bg-warning {
-    border: 1px solid #F97316;
-    background-color: #F97316 !important;
+    border: 1px solid var(--brand-warning);
+    background-color: var(--brand-warning) !important;
     color: var(--brand-white) !important;
 }
 
 .product-row-low-stock > * {
-    background-color: #FFF7ED;
+    background-color: var(--brand-low-stock-bg);
 }
 
 .product-row-low-stock:hover > * {
-    background-color: #FFEDD5;
+    background-color: var(--brand-low-stock-hover-bg);
 }
 
 .table {
+    --bs-table-bg: var(--brand-surface);
+    --bs-table-color: var(--brand-text);
+    --bs-table-border-color: var(--brand-border);
     color: var(--brand-text);
 }
 
 .table > :not(caption) > * > * {
     padding: 0.95rem 1rem;
     border-bottom-color: var(--brand-border);
+    background-color: var(--brand-surface);
+    color: var(--brand-text);
 }
 
 .table thead th {
@@ -555,7 +687,7 @@ body.is-sidebar-collapsed .app-sidebar-link .bi {
 }
 
 .table-hover > tbody > tr:hover > * {
-    background-color: #F1FAFD;
+    background-color: var(--brand-table-hover);
 }
 
 #bill-items .qty-input {
@@ -583,8 +715,8 @@ body.is-sidebar-collapsed .app-sidebar-link .bi {
     padding: 0.5rem;
     border: 1px solid var(--brand-border);
     border-radius: 8px;
-    background-color: var(--brand-white);
-    box-shadow: 0 12px 24px rgba(31, 41, 55, 0.10);
+    background-color: var(--brand-surface);
+    box-shadow: var(--brand-popover-shadow);
 }
 
 .product-picker-results {
