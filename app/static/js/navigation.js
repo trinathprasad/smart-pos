@@ -1,9 +1,12 @@
 const activeNavigationKey = "smartStoreActiveNavigation";
 const activeSidebarKey = "smartStoreActiveSidebarItem";
+const sidebarCollapsedKey = "smartStoreSidebarCollapsed";
 const headerNavItems = document.querySelectorAll("[data-header-nav-item]");
 const topNavItems = document.querySelectorAll("[data-top-nav-item]");
 const sidebarItems = document.querySelectorAll("[data-sidebar-item]");
 const appNavbar = document.querySelector(".app-navbar");
+const sidebarToggle = document.querySelector("[data-sidebar-toggle]");
+const sidebarTooltips = [];
 
 function updateAppNavbarHeight() {
     if (!appNavbar) {
@@ -11,6 +14,38 @@ function updateAppNavbarHeight() {
     }
 
     document.documentElement.style.setProperty("--app-navbar-height", `${appNavbar.offsetHeight}px`);
+}
+
+function setSidebarCollapsed(isCollapsed) {
+    document.body.classList.toggle("is-sidebar-collapsed", isCollapsed);
+    localStorage.setItem(sidebarCollapsedKey, isCollapsed ? "true" : "false");
+
+    if (sidebarToggle) {
+        sidebarToggle.setAttribute("aria-expanded", String(!isCollapsed));
+        sidebarToggle.setAttribute("aria-label", isCollapsed ? "Expand sidebar" : "Collapse sidebar");
+    }
+
+    sidebarTooltips.forEach((tooltip) => {
+        if (isCollapsed) {
+            tooltip.enable();
+        } else {
+            tooltip.hide();
+            tooltip.disable();
+        }
+    });
+}
+
+function initializeSidebarTooltips() {
+    if (!window.bootstrap || !window.bootstrap.Tooltip) {
+        return;
+    }
+
+    sidebarItems.forEach((item) => {
+        sidebarTooltips.push(new window.bootstrap.Tooltip(item, {
+            container: "body",
+            trigger: "hover focus"
+        }));
+    });
 }
 
 function clearHeaderNavItems() {
@@ -131,6 +166,15 @@ sidebarItems.forEach((item) => {
         }
     });
 });
+
+initializeSidebarTooltips();
+setSidebarCollapsed(localStorage.getItem(sidebarCollapsedKey) === "true");
+
+if (sidebarToggle) {
+    sidebarToggle.addEventListener("click", () => {
+        setSidebarCollapsed(!document.body.classList.contains("is-sidebar-collapsed"));
+    });
+}
 
 updateAppNavbarHeight();
 window.addEventListener("load", updateAppNavbarHeight);

@@ -80,24 +80,29 @@
     {% if show_app_shell %}
         <div class="app-layout">
             <aside class="app-sidebar" aria-label="Main sidebar">
+                <div class="app-sidebar-header">
+                    <button class="app-sidebar-toggle" type="button" aria-label="Collapse sidebar" aria-expanded="true" data-sidebar-toggle>
+                        <i class="bi bi-layout-sidebar-reverse"></i>
+                    </button>
+                </div>
                 <nav class="app-sidebar-nav">
-                    <div class="app-sidebar-link" role="button" tabindex="0" data-sidebar-item="categories">
+                    <div class="app-sidebar-link" role="button" tabindex="0" data-sidebar-item="categories" title="Categories" data-bs-placement="right">
                         <i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>
                         <span>Categories</span>
                     </div>
-                    <div class="app-sidebar-link" role="button" tabindex="0" data-sidebar-item="quick-actions">
+                    <div class="app-sidebar-link" role="button" tabindex="0" data-sidebar-item="quick-actions" title="Quick Actions" data-bs-placement="right">
                         <i class="bi bi-lightning-charge" aria-hidden="true"></i>
                         <span>Quick Actions</span>
                     </div>
-                    <div class="app-sidebar-link" role="button" tabindex="0" data-sidebar-item="inventory">
+                    <div class="app-sidebar-link" role="button" tabindex="0" data-sidebar-item="inventory" title="Inventory" data-bs-placement="right">
                         <i class="bi bi-boxes" aria-hidden="true"></i>
                         <span>Inventory</span>
                     </div>
-                    <div class="app-sidebar-link" role="button" tabindex="0" data-sidebar-item="help">
+                    <div class="app-sidebar-link" role="button" tabindex="0" data-sidebar-item="help" title="Help" data-bs-placement="right">
                         <i class="bi bi-question-circle" aria-hidden="true"></i>
                         <span>Help</span>
                     </div>
-                    <div class="app-sidebar-link" role="button" tabindex="0" data-sidebar-item="reports">
+                    <div class="app-sidebar-link" role="button" tabindex="0" data-sidebar-item="reports" title="Reports" data-bs-placement="right">
                         <i class="bi bi-file-earmark-spreadsheet" aria-hidden="true"></i>
                         <span>Reports</span>
                     </div>
