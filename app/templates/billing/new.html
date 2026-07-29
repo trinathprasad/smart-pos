@@ -7,7 +7,10 @@
         <h1 class="h3 mb-1">New Bill</h1>
         <p class="text-muted mb-0">Invoice {{ draft_invoice or "will be generated" }}</p>
     </div>
-    <a href="{{ url_for('products.create') }}" class="btn btn-outline-primary">Add New Product</a>
+    <a href="{{ url_for('products.create') }}" class="btn btn-outline-primary d-inline-flex align-items-center">
+        <i class="bi bi-plus-circle me-2"></i>
+        Add Product
+    </a>
 </div>
 
 <form method="post" id="billing-form">
@@ -128,7 +131,10 @@
                         <span>Total Payable</span>
                         <strong class="fs-5" id="grand-total">₹0.00</strong>
                     </div>
-                    <button class="btn btn-primary w-100 mt-4">Save Bill</button>
+                    <button class="btn btn-primary w-100 mt-4 d-inline-flex align-items-center justify-content-center">
+                        <i class="bi bi-floppy me-2"></i>
+                        Save Bill
+                    </button>
                 </div>
             </div>
         </div>

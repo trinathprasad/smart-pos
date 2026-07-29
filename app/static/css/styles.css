@@ -80,6 +80,53 @@ body {
     color: var(--brand-text);
 }
 
+.app-page-loader {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: 2000;
+    height: 3px;
+    overflow: hidden;
+    background-color: transparent;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-3px);
+    transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.app-page-loader-bar {
+    width: 45%;
+    height: 100%;
+    border-radius: 0 3px 3px 0;
+    background-color: var(--brand-primary-dark);
+    box-shadow: 0 0 12px rgba(24, 181, 229, 0.45);
+    transform: translateX(-100%);
+}
+
+body.is-page-loading .app-page-loader {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+body.is-page-loading .app-page-loader-bar {
+    animation: app-page-loader-slide 900ms ease-in-out infinite;
+}
+
+@keyframes app-page-loader-slide {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    55% {
+        transform: translateX(95vw);
+    }
+
+    100% {
+        transform: translateX(100vw);
+    }
+}
+
 body,
 .app-top-header,
 .app-brand,

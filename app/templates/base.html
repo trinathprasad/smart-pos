@@ -16,6 +16,9 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body class="{% block body_class %}page-default{% endblock %}">
+    <div class="app-page-loader" aria-hidden="true">
+        <div class="app-page-loader-bar"></div>
+    </div>
     {% set show_app_shell = not config.get("AUTH_REQUIRED", False) or session.get("admin_logged_in") %}
     {% set active_section = request.endpoint.split('.')[0] if request.endpoint else '' %}
     <header class="app-top-header">

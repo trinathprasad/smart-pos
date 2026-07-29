@@ -10,6 +10,40 @@ const sidebarToggle = document.querySelector("[data-sidebar-toggle]");
 const darkModeToggle = document.getElementById("darkModeToggle");
 const sidebarTooltips = [];
 
+function showPageLoader() {
+    document.body.classList.add("is-page-loading");
+}
+
+function hidePageLoader() {
+    document.body.classList.remove("is-page-loading");
+}
+
+function shouldShowPageLoader(event, link) {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+        return false;
+    }
+
+    if (!link || (link.target && link.target !== "_self") || link.hasAttribute("download")) {
+        return false;
+    }
+
+    const href = link.getAttribute("href");
+    if (!href || href.startsWith("#")) {
+        return false;
+    }
+
+    const destination = new URL(link.href, window.location.href);
+    return destination.origin === window.location.origin;
+}
+
+function attachPageLoader(link) {
+    link.addEventListener("click", (event) => {
+        if (shouldShowPageLoader(event, link)) {
+            showPageLoader();
+        }
+    });
+}
+
 function updateAppNavbarHeight() {
     if (!appNavbar) {
         return;
@@ -162,10 +196,12 @@ if (localStorage.getItem(activeNavigationKey) === "header") {
 
 headerNavItems.forEach((item) => {
     item.addEventListener("click", () => activateHeaderNavItem(item));
+    attachPageLoader(item);
 });
 
 topNavItems.forEach((item) => {
     item.addEventListener("click", () => activateTopNavItem(item));
+    attachPageLoader(item);
 });
 
 sidebarItems.forEach((item) => {
@@ -197,6 +233,7 @@ if (darkModeToggle) {
 
 updateAppNavbarHeight();
 window.addEventListener("load", updateAppNavbarHeight);
+window.addEventListener("pageshow", hidePageLoader);
 window.addEventListener("resize", updateAppNavbarHeight);
 
 if (appNavbar) {
