@@ -142,6 +142,7 @@ class CustomerLedger(db.Model):
 class ShopSetting(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     shop_name = db.Column(db.String(150), nullable=False, default="Local Shop Billing")
+    logo_path = db.Column(db.String(255), nullable=True)
     phone = db.Column(db.String(30), nullable=True)
     address = db.Column(db.Text, nullable=True)
     invoice_prefix = db.Column(db.String(20), nullable=False, default="INV")

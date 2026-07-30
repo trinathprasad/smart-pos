@@ -547,6 +547,124 @@ body.is-sidebar-collapsed .app-sidebar-link .bi {
     font-weight: 700;
 }
 
+.settings-section-card {
+    overflow: hidden;
+}
+
+.settings-section-header {
+    display: flex;
+    align-items: center;
+    min-height: 58px;
+    padding: 1rem 1.5rem;
+}
+
+.settings-section-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.2;
+}
+
+.settings-section-title .bi {
+    color: var(--brand-primary-dark);
+    font-size: 1.15rem;
+    line-height: 1;
+}
+
+.settings-logo-upload {
+    display: flex;
+    width: min(100%, 320px);
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.85rem;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.settings-logo-native-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+}
+
+.settings-logo-card {
+    display: flex;
+    width: 200px;
+    height: 200px;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+    overflow: hidden;
+    padding: 1.5rem;
+    border: 1px solid var(--brand-border);
+    border-radius: 8px;
+    background-color: var(--brand-header);
+    cursor: pointer;
+    transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.settings-logo-card:hover,
+.settings-logo-card:focus {
+    border-color: var(--brand-primary);
+    background-color: var(--brand-surface);
+    box-shadow: var(--brand-focus-shadow);
+}
+
+.settings-logo-card img {
+    display: block;
+    max-width: 160px;
+    max-height: 160px;
+    object-fit: contain;
+}
+
+.settings-logo-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 0.75rem;
+    color: var(--brand-muted);
+    text-align: center;
+}
+
+.settings-logo-placeholder-icon {
+    color: var(--brand-primary-dark);
+    font-size: 2.15rem;
+    line-height: 1;
+}
+
+.settings-logo-placeholder-title {
+    color: var(--brand-text);
+    font-weight: 700;
+}
+
+.settings-logo-placeholder-format {
+    color: var(--brand-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.settings-logo-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+}
+
+.settings-logo-actions .btn {
+    flex: 1 1 135px;
+}
+
+.settings-logo-alert {
+    max-width: 520px;
+    margin-bottom: 1rem;
+}
+
 .summary-card {
     position: sticky;
     top: 1rem;

@@ -77,6 +77,9 @@ def create_app(config_class=Config):
             db.session.execute(
                 text("ALTER TABLE sale ADD COLUMN previous_pending_amount NUMERIC(10, 2) NOT NULL DEFAULT 0.00")
             )
+        shop_setting_columns = {column["name"] for column in inspector.get_columns("shop_setting")}
+        if "logo_path" not in shop_setting_columns:
+            db.session.execute(text("ALTER TABLE shop_setting ADD COLUMN logo_path VARCHAR(255)"))
         db.session.execute(
             text("UPDATE sale SET paid_amount = grand_total WHERE payment_status = 'Paid' AND paid_amount = 0")
         )
