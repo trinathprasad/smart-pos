@@ -2,36 +2,104 @@
 {% block title %}Dashboard | Local Shop Billing{% endblock %}
 {% block body_class %}page-dashboard{% endblock %}
 {% block content %}
+{% set kpi_comparisons = dashboard_kpi_comparisons() %}
 <div class="row g-4 mb-4">
     <div class="col-md-3">
         <div class="card stat-card">
             <div class="card-body">
-                <p class="text-muted mb-2">Products</p>
-                <h2 class="mb-0">{{ product_count }}</h2>
+                <div class="kpi-card-title">
+                    <i class="bi bi-box-seam-fill text-primary"></i>
+                    <span>Products</span>
+                </div>
+                <h2 class="mb-1 stat-value stat-value-products" data-countup data-countup-value="{{ product_count }}">{{ product_count }}</h2>
+                <p class="kpi-comparison text-muted mb-0">Total Products</p>
             </div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card stat-card">
             <div class="card-body">
-                <p class="text-muted mb-2">Low Stock Items</p>
-                <h2 class="mb-0">{{ low_stock_count }}</h2>
+                <div class="kpi-card-title">
+                    <i class="bi bi-exclamation-triangle-fill text-warning"></i>
+                    <span>Low Stock</span>
+                </div>
+                <h2 class="mb-1 stat-value {% if low_stock_count == 0 %}stat-value-low-stock-ok{% else %}stat-value-low-stock-alert{% endif %}" data-countup data-countup-value="{{ low_stock_count }}">{{ low_stock_count }}</h2>
+                <p class="kpi-comparison text-muted mb-0">Products below minimum stock</p>
             </div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card stat-card">
             <div class="card-body">
-                <p class="text-muted mb-2">Today's Revenue</p>
-                <h2 class="mb-0">₹{{ "%.2f"|format(revenue_today) }}</h2>
+                <div class="kpi-card-title">
+                    <i class="bi bi-cash-stack text-success"></i>
+                    <span>Today's Revenue</span>
+                </div>
+                <h2 class="mb-1 stat-value stat-value-revenue"><span data-countup data-countup-prefix="&#8377;" data-countup-decimals="2" data-countup-value="{{ revenue_today }}">&#8377;{{ "%.2f"|format(revenue_today) }}</span></h2>
+                <p class="kpi-comparison text-muted mb-0">
+                    {% set revenue_comparison = kpi_comparisons.revenue %}
+                    {% if revenue_comparison is none %}
+                        <i class="bi bi-dash-lg text-secondary me-1"></i>No comparison available
+                    {% elif revenue_comparison >= 0 %}
+                        <i class="bi bi-arrow-up-right text-success me-1"></i>+{{ "%.0f"|format(revenue_comparison) }}% vs Yesterday
+                    {% else %}
+                        <i class="bi bi-arrow-down-right text-danger me-1"></i>{{ "%.0f"|format(revenue_comparison) }}% vs Yesterday
+                    {% endif %}
+                </p>
             </div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card stat-card">
             <div class="card-body">
-                <p class="text-muted mb-2">Today's Profit</p>
-                <h2 class="mb-0">&#8377;{{ "%.2f"|format(profit_today) }}</h2>
+                <div class="kpi-card-title">
+                    <i class="bi bi-graph-up-arrow text-info"></i>
+                    <span>Today's Profit</span>
+                </div>
+                <h2 class="mb-1 stat-value stat-value-profit"><span data-countup data-countup-prefix="&#8377;" data-countup-decimals="2" data-countup-value="{{ profit_today }}">&#8377;{{ "%.2f"|format(profit_today) }}</span></h2>
+                <p class="kpi-comparison text-muted mb-0">
+                    {% set profit_comparison = kpi_comparisons.profit %}
+                    {% if profit_comparison is none %}
+                        <i class="bi bi-dash-lg text-secondary me-1"></i>No comparison available
+                    {% elif profit_comparison >= 0 %}
+                        <i class="bi bi-arrow-up-right text-success me-1"></i>+{{ "%.0f"|format(profit_comparison) }}% vs Yesterday
+                    {% else %}
+                        <i class="bi bi-arrow-down-right text-danger me-1"></i>{{ "%.0f"|format(profit_comparison) }}% vs Yesterday
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-7">
+        <div class="card dashboard-chart-card h-100">
+            <div class="card-header d-flex flex-wrap gap-2 justify-content-between align-items-center">
+                <h5 class="mb-0">Sales Overview</h5>
+                <div class="btn-group btn-group-sm" role="group" aria-label="Sales overview period">
+                    <button type="button" class="btn btn-outline-primary" data-sales-filter="today">Today</button>
+                    <button type="button" class="btn btn-primary" data-sales-filter="7days" aria-pressed="true">7 Days</button>
+                    <button type="button" class="btn btn-outline-primary" data-sales-filter="30days">30 Days</button>
+                    <button type="button" class="btn btn-outline-primary" data-sales-filter="year">This Year</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="dashboard-chart-wrap">
+                    <canvas id="salesOverviewChart" aria-label="Sales Overview line chart" role="img"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card dashboard-chart-card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">Top Selling Products</h5>
+            </div>
+            <div class="card-body">
+                <div class="dashboard-chart-wrap">
+                    <canvas id="topProductsChart" aria-label="Top Selling Products bar chart" role="img"></canvas>
+                </div>
             </div>
         </div>
     </div>
@@ -63,7 +131,7 @@
                             <td>{{ sale.invoice_no }}</td>
                             <td>{{ sale.customer_name or "Walk-in" }}</td>
                             <td>{{ sale.payment_mode }}</td>
-                            <td>₹{{ "%.2f"|format(sale.grand_total) }}</td>
+                            <td>&#8377;{{ "%.2f"|format(sale.grand_total) }}</td>
                             <td><a href="{{ url_for('billing.view_sale', sale_id=sale.id) }}" class="btn btn-sm btn-outline-primary">View</a></td>
                         </tr>
                     {% else %}
@@ -76,4 +144,13 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"></script>
+    <script>
+        window.dashboardChartData = {{ dashboard_chart_data|tojson }};
+    </script>
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 {% endblock %}

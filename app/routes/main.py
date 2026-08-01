@@ -1,11 +1,53 @@
 from decimal import Decimal
 
 from flask import Blueprint, render_template
+from sqlalchemy import func
 
-from ..models import Product, Sale
+from ..models import Product, Sale, SaleItem
 from ..utils import local_today, utc_bounds_for_local_date
 
 main_bp = Blueprint("main", __name__)
+
+
+def _sales_overview_chart_data():
+    sale_day = func.date(Sale.created_at, "+5 hours", "+30 minutes")
+    sales_by_day = (
+        Sale.query
+        .with_entities(
+            sale_day.label("sale_day"),
+            func.sum(Sale.grand_total).label("total_sales"),
+        )
+        .group_by(sale_day)
+        .order_by(sale_day)
+        .all()
+    )
+
+    return {
+        "labels": [row.sale_day for row in sales_by_day],
+        "values": [float(row.total_sales or 0) for row in sales_by_day],
+        "emptyMessage": "No sales data available yet.",
+    }
+
+
+def _top_products_chart_data():
+    quantity_sold = func.sum(SaleItem.qty)
+    top_products = (
+        SaleItem.query
+        .with_entities(
+            func.max(SaleItem.product_name).label("product_name"),
+            quantity_sold.label("quantity_sold"),
+        )
+        .group_by(SaleItem.product_id)
+        .order_by(quantity_sold.desc(), func.max(SaleItem.product_name).asc())
+        .limit(5)
+        .all()
+    )
+
+    return {
+        "labels": [row.product_name for row in top_products],
+        "values": [float(row.quantity_sold or 0) for row in top_products],
+        "emptyMessage": "No product sales available.",
+    }
 
 
 @main_bp.route("/")
@@ -37,4 +79,8 @@ def index():
         revenue_today=revenue_today,
         profit_today=profit_today,
         sales_today=sales_today,
+        dashboard_chart_data={
+            "salesOverview": _sales_overview_chart_data(),
+            "topProducts": _top_products_chart_data(),
+        },
     )

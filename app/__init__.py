@@ -4,6 +4,7 @@ from flask import Flask, redirect, request, session, url_for
 from sqlalchemy import inspect, text
 
 from .config import Config
+from .dashboard_metrics import dashboard_kpi_comparisons
 from .extensions import db
 from .utils import format_bill_datetime, format_quantity, format_quantity_with_unit
 
@@ -14,6 +15,7 @@ def create_app(config_class=Config):
     app.jinja_env.filters["bill_datetime"] = format_bill_datetime
     app.jinja_env.filters["quantity"] = format_quantity
     app.jinja_env.filters["quantity_with_unit"] = format_quantity_with_unit
+    app.jinja_env.globals["dashboard_kpi_comparisons"] = dashboard_kpi_comparisons
 
     @app.before_request
     def require_admin_login():

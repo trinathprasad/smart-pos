@@ -540,6 +540,70 @@ body.is-sidebar-collapsed .app-sidebar-link .bi {
     box-shadow: var(--brand-card-shadow);
 }
 
+.stat-value {
+    font-weight: 800;
+}
+
+.stat-card .card-body {
+    padding: 1.25rem;
+}
+
+.kpi-card-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    color: var(--brand-muted);
+    font-size: 0.92rem;
+    font-weight: 700;
+}
+
+.kpi-card-title i {
+    font-size: 1.05rem;
+    line-height: 1;
+}
+
+.kpi-comparison {
+    min-height: 1.25rem;
+    font-size: 0.86rem;
+    font-weight: 600;
+}
+
+.stat-value-products {
+    color: #3B82F6;
+}
+
+.stat-value-low-stock-ok {
+    color: var(--brand-success);
+}
+
+.stat-value-low-stock-alert {
+    color: var(--brand-warning);
+}
+
+.stat-value-revenue {
+    color: #8B5CF6;
+}
+
+.stat-value-profit {
+    color: #F59E0B;
+}
+
+.dashboard-chart-card .card-body {
+    padding: 1.25rem;
+}
+
+.dashboard-chart-wrap {
+    position: relative;
+    min-height: 300px;
+}
+
+.dashboard-chart-wrap canvas {
+    display: block;
+    width: 100% !important;
+    height: 300px !important;
+}
+
 .card-header {
     border-bottom-color: var(--brand-border);
     background-color: var(--brand-surface);
