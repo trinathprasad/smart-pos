@@ -5,10 +5,12 @@ const themeStorageKey = "smartStoreTheme";
 const headerNavItems = document.querySelectorAll("[data-header-nav-item]");
 const topNavItems = document.querySelectorAll("[data-top-nav-item]");
 const sidebarItems = document.querySelectorAll("[data-sidebar-item]");
+const dashboardStatLinks = document.querySelectorAll(".dashboard-stat-link");
 const appNavbar = document.querySelector(".app-navbar");
 const sidebarToggle = document.querySelector("[data-sidebar-toggle]");
 const darkModeToggle = document.getElementById("darkModeToggle");
 const sidebarTooltips = [];
+const appTooltips = [];
 
 function showPageLoader() {
     document.body.classList.add("is-page-loading");
@@ -90,6 +92,23 @@ function initializeSidebarTooltips() {
         sidebarTooltips.push(new window.bootstrap.Tooltip(item, {
             container: "body",
             trigger: "hover focus"
+        }));
+    });
+}
+
+function initializeAppTooltips() {
+    if (!window.bootstrap || !window.bootstrap.Tooltip) {
+        return;
+    }
+
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((item) => {
+        appTooltips.push(new window.bootstrap.Tooltip(item, {
+            container: "body",
+            trigger: "hover focus",
+            delay: {
+                show: 300,
+                hide: 100
+            }
         }));
     });
 }
@@ -215,7 +234,18 @@ sidebarItems.forEach((item) => {
     });
 });
 
+dashboardStatLinks.forEach((link) => {
+    attachPageLoader(link);
+    link.addEventListener("keydown", (event) => {
+        if (event.key === " ") {
+            event.preventDefault();
+            link.click();
+        }
+    });
+});
+
 initializeSidebarTooltips();
+initializeAppTooltips();
 setSidebarCollapsed(localStorage.getItem(sidebarCollapsedKey) === "true");
 applyTheme(localStorage.getItem(themeStorageKey) || document.documentElement.getAttribute("data-theme"));
 

@@ -23,6 +23,7 @@
     --brand-danger-border: #FECACA;
     --brand-top-header-shadow: 0 8px 18px rgba(31, 41, 55, 0.05);
     --brand-card-shadow: 0 10px 24px rgba(31, 41, 55, 0.07);
+    --brand-card-hover-shadow: 0 14px 30px rgba(31, 41, 55, 0.12);
     --brand-popover-shadow: 0 12px 24px rgba(31, 41, 55, 0.10);
     --brand-settings-active-shadow: 0 6px 14px rgba(10, 142, 194, 0.18);
     --brand-nav-active-shadow: 0 6px 14px rgba(10, 142, 194, 0.24);
@@ -62,6 +63,7 @@
     --brand-danger-border: #7F1D1D;
     --brand-top-header-shadow: 0 8px 18px rgba(0, 0, 0, 0.22);
     --brand-card-shadow: 0 10px 24px rgba(0, 0, 0, 0.24);
+    --brand-card-hover-shadow: 0 16px 34px rgba(0, 0, 0, 0.34);
     --brand-popover-shadow: 0 12px 24px rgba(0, 0, 0, 0.32);
     --brand-settings-active-shadow: 0 6px 14px rgba(24, 181, 229, 0.2);
     --brand-nav-active-shadow: 0 6px 14px rgba(0, 0, 0, 0.22);
@@ -546,6 +548,65 @@ body.is-sidebar-collapsed .app-sidebar-link .bi {
 
 .stat-card .card-body {
     padding: 1.25rem;
+}
+
+.dashboard-stat-link {
+    height: 100%;
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease;
+}
+
+.dashboard-stat-link:hover {
+    color: inherit;
+    box-shadow: var(--brand-card-hover-shadow);
+    transform: translateY(-2px);
+}
+
+.dashboard-stat-link:focus {
+    outline: 0;
+    border-color: var(--brand-primary);
+    border-radius: 8px;
+    color: inherit;
+    box-shadow: var(--brand-card-hover-shadow), var(--brand-focus-shadow);
+    transform: translateY(-2px);
+}
+
+@supports selector(:focus-visible) {
+    .dashboard-stat-link:focus:not(:focus-visible) {
+        border-color: var(--brand-border);
+        box-shadow: var(--brand-card-shadow);
+        transform: none;
+    }
+
+    .dashboard-stat-link:focus-visible {
+        outline: 0;
+        border-color: var(--brand-primary);
+        border-radius: 8px;
+        box-shadow: var(--brand-card-hover-shadow), var(--brand-focus-shadow);
+        transform: translateY(-2px);
+    }
+}
+
+#daily-profit:focus {
+    outline: 0;
+}
+
+#daily-profit:focus-visible .stat-card {
+    border-color: var(--brand-primary);
+    box-shadow: var(--brand-card-hover-shadow), var(--brand-focus-shadow);
+}
+
+.tooltip {
+    --bs-tooltip-bg: var(--brand-text);
+    --bs-tooltip-color: var(--brand-surface);
+    --bs-tooltip-opacity: 1;
+}
+
+[data-theme="dark"] .tooltip {
+    --bs-tooltip-bg: var(--brand-surface);
+    --bs-tooltip-color: var(--brand-text);
 }
 
 .kpi-card-title {

@@ -79,6 +79,7 @@ def index():
         revenue_today=revenue_today,
         profit_today=profit_today,
         sales_today=sales_today,
+        today_date=local_today().isoformat(),
         dashboard_chart_data={
             "salesOverview": _sales_overview_chart_data(),
             "topProducts": _top_products_chart_data(),

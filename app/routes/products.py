@@ -18,8 +18,11 @@ def index():
     query = request.args.get("q", "").strip()
     sku_filter = request.args.get("sku", "").strip()
     name_filter = request.args.get("name", "").strip()
+    stock_filter = request.args.get("filter", "").strip().lower()
     sort = request.args.get("sort", "name").strip().lower()
     direction = request.args.get("direction", "asc").strip().lower()
+    if stock_filter != "low_stock":
+        stock_filter = ""
 
     sort_columns = {
         "sku": Product.sku,
@@ -40,6 +43,8 @@ def index():
         product_query = product_query.filter(Product.sku.ilike(f"%{sku_filter}%"))
     if name_filter:
         product_query = product_query.filter(Product.name.ilike(f"%{name_filter}%"))
+    if stock_filter == "low_stock":
+        product_query = product_query.filter(Product.stock_qty <= Product.low_stock_threshold)
 
     sort_column = sort_columns[sort]
     order_expression = sort_column.desc() if direction == "desc" else sort_column.asc()
@@ -52,6 +57,7 @@ def index():
         query=query,
         sku_filter=sku_filter,
         name_filter=name_filter,
+        stock_filter=stock_filter,
         sort=sort,
         direction=direction,
     )

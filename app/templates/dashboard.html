@@ -5,7 +5,7 @@
 {% set kpi_comparisons = dashboard_kpi_comparisons() %}
 <div class="row g-4 mb-4">
     <div class="col-md-3">
-        <div class="card stat-card">
+        <a class="card stat-card dashboard-stat-link" href="{{ url_for('products.index') }}" title="View all products" aria-label="View all products" data-bs-toggle="tooltip" data-bs-delay='{"show":300,"hide":100}'>
             <div class="card-body">
                 <div class="kpi-card-title">
                     <i class="bi bi-box-seam-fill text-primary"></i>
@@ -14,10 +14,10 @@
                 <h2 class="mb-1 stat-value stat-value-products" data-countup data-countup-value="{{ product_count }}">{{ product_count }}</h2>
                 <p class="kpi-comparison text-muted mb-0">Total Products</p>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-md-3">
-        <div class="card stat-card">
+        <a class="card stat-card dashboard-stat-link" href="{{ url_for('products.index', filter='low_stock') }}" title="View low stock products" aria-label="View low stock products" data-bs-toggle="tooltip" data-bs-delay='{"show":300,"hide":100}'>
             <div class="card-body">
                 <div class="kpi-card-title">
                     <i class="bi bi-exclamation-triangle-fill text-warning"></i>
@@ -26,10 +26,10 @@
                 <h2 class="mb-1 stat-value {% if low_stock_count == 0 %}stat-value-low-stock-ok{% else %}stat-value-low-stock-alert{% endif %}" data-countup data-countup-value="{{ low_stock_count }}">{{ low_stock_count }}</h2>
                 <p class="kpi-comparison text-muted mb-0">Products below minimum stock</p>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-md-3">
-        <div class="card stat-card">
+        <a class="card stat-card dashboard-stat-link" href="{{ url_for('reports.daily', date=today_date) }}" title="Open today's sales report" aria-label="Open today's sales report" data-bs-toggle="tooltip" data-bs-delay='{"show":300,"hide":100}'>
             <div class="card-body">
                 <div class="kpi-card-title">
                     <i class="bi bi-cash-stack text-success"></i>
@@ -47,10 +47,10 @@
                     {% endif %}
                 </p>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-md-3">
-        <div class="card stat-card">
+        <a class="card stat-card dashboard-stat-link" href="{{ url_for('reports.daily', date=today_date) }}#daily-profit" title="Open today's profit report" aria-label="Open today's profit report" data-bs-toggle="tooltip" data-bs-delay='{"show":300,"hide":100}'>
             <div class="card-body">
                 <div class="kpi-card-title">
                     <i class="bi bi-graph-up-arrow text-info"></i>
@@ -68,7 +68,7 @@
                     {% endif %}
                 </p>
             </div>
-        </div>
+        </a>
     </div>
 </div>
 
