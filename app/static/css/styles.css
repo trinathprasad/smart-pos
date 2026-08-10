@@ -650,6 +650,14 @@ body.is-sidebar-collapsed .app-sidebar-link .bi {
     color: #F59E0B;
 }
 
+.stat-value-out-of-stock {
+    color: var(--brand-danger);
+}
+
+.stat-value-inventory {
+    color: var(--brand-success);
+}
+
 .dashboard-chart-card .card-body {
     padding: 1.25rem;
 }
@@ -901,6 +909,61 @@ body.is-sidebar-collapsed .app-sidebar-link .bi {
     font-weight: 600;
 }
 
+.product-filter-form {
+    display: grid;
+    grid-template-columns: minmax(260px, 1.8fr) repeat(4, minmax(150px, 1fr)) auto;
+    align-items: end;
+    gap: 1rem;
+}
+
+.product-filter-main {
+    min-width: 0;
+}
+
+.product-search-control {
+    position: relative;
+}
+
+.product-search-control .form-control {
+    padding-left: 2.35rem;
+}
+
+.product-search-icon {
+    position: absolute;
+    top: 50%;
+    left: 0.85rem;
+    z-index: 2;
+    color: var(--brand-muted);
+    line-height: 1;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.product-filter-actions {
+    display: flex;
+    gap: 0.65rem;
+}
+
+.product-filter-actions .btn {
+    min-width: 94px;
+}
+
+.product-active-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+
+.product-active-filters .text-bg-light {
+    border: 1px solid var(--brand-border);
+    background-color: var(--brand-header) !important;
+    color: var(--brand-text) !important;
+}
+
 .form-text {
     color: var(--brand-muted);
 }
@@ -1100,6 +1163,15 @@ body.is-sidebar-collapsed .app-sidebar-link .bi {
     .summary-card {
         position: static;
     }
+
+    .product-filter-form {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .product-filter-main,
+    .product-filter-actions {
+        grid-column: 1 / -1;
+    }
 }
 
 @media (max-width: 575px) {
@@ -1114,5 +1186,13 @@ body.is-sidebar-collapsed .app-sidebar-link .bi {
 
     .app-sidebar-nav {
         grid-template-columns: 1fr;
+    }
+
+    .product-filter-form {
+        grid-template-columns: 1fr;
+    }
+
+    .product-filter-actions {
+        flex-direction: column;
     }
 }

@@ -1,4 +1,5 @@
 import csv
+from decimal import Decimal
 from io import StringIO
 
 from flask import Blueprint, Response, flash, redirect, render_template, request, url_for
@@ -13,20 +14,57 @@ from ..utils import to_decimal
 products_bp = Blueprint("products", __name__, url_prefix="/products")
 
 
+def _format_indian_number(value: Decimal) -> str:
+    amount = to_decimal(value)
+    sign = "-" if amount < 0 else ""
+    whole, fraction = f"{abs(amount):.2f}".split(".")
+    if len(whole) > 3:
+        leading = whole[:-3]
+        trailing = whole[-3:]
+        groups = []
+        while len(leading) > 2:
+            groups.insert(0, leading[-2:])
+            leading = leading[:-2]
+        if leading:
+            groups.insert(0, leading)
+        whole = f"{','.join(groups)},{trailing}"
+    return f"{sign}{whole}.{fraction}"
+
+
+def _product_statistics():
+    products = Product.query.filter_by(is_active=True).all()
+    inventory_value = sum(
+        (product.purchase_price * product.stock_qty for product in products),
+        start=Decimal("0.00"),
+    )
+    return {
+        "total_products": len(products),
+        "low_stock": sum(1 for product in products if product.stock_qty <= product.low_stock_threshold),
+        "out_of_stock": sum(1 for product in products if product.stock_qty == 0),
+        "inventory_value": inventory_value,
+        "inventory_value_display": _format_indian_number(inventory_value),
+    }
+
+
 @products_bp.route("/")
 def index():
     query = request.args.get("q", "").strip()
     sku_filter = request.args.get("sku", "").strip()
     name_filter = request.args.get("name", "").strip()
+    category_filter = request.args.get("category", "").strip()
     stock_filter = request.args.get("filter", "").strip().lower()
     sort = request.args.get("sort", "name").strip().lower()
     direction = request.args.get("direction", "asc").strip().lower()
-    if stock_filter != "low_stock":
+    if stock_filter not in {"healthy", "low_stock", "out_of_stock"}:
         stock_filter = ""
 
     sort_columns = {
         "sku": Product.sku,
         "name": Product.name,
+        "category": Product.category,
+        "stock": Product.stock_qty,
+        "purchase_price": Product.purchase_price,
+        "selling_price": Product.selling_price,
     }
     if sort not in sort_columns:
         sort = "name"
@@ -36,27 +74,46 @@ def index():
     product_query = Product.query.filter_by(is_active=True)
     if query:
         like = f"%{query}%"
-        product_query = product_query.filter(
-            or_(Product.name.ilike(like), Product.sku.ilike(like), Product.category.ilike(like))
-        )
+        search_columns = [Product.name, Product.sku, Product.category]
+        barcode_column = getattr(Product, "barcode", None)
+        if barcode_column is not None:
+            search_columns.append(barcode_column)
+        product_query = product_query.filter(or_(*(column.ilike(like) for column in search_columns)))
     if sku_filter:
         product_query = product_query.filter(Product.sku.ilike(f"%{sku_filter}%"))
     if name_filter:
         product_query = product_query.filter(Product.name.ilike(f"%{name_filter}%"))
-    if stock_filter == "low_stock":
+    if category_filter:
+        product_query = product_query.filter(Product.category == category_filter)
+    if stock_filter == "healthy":
+        product_query = product_query.filter(Product.stock_qty > Product.low_stock_threshold)
+    elif stock_filter == "low_stock":
         product_query = product_query.filter(Product.stock_qty <= Product.low_stock_threshold)
+    elif stock_filter == "out_of_stock":
+        product_query = product_query.filter(Product.stock_qty == 0)
 
     sort_column = sort_columns[sort]
     order_expression = sort_column.desc() if direction == "desc" else sort_column.asc()
     product_query = product_query.order_by(order_expression, Product.name.asc())
 
     products = product_query.all()
+    categories = [
+        row[0]
+        for row in Product.query.with_entities(Product.category)
+        .filter(Product.is_active.is_(True), Product.category.isnot(None), Product.category != "")
+        .distinct()
+        .order_by(Product.category.asc())
+        .all()
+    ]
     return render_template(
         "products/index.html",
         products=products,
+        product_stats=_product_statistics(),
+        categories=categories,
         query=query,
         sku_filter=sku_filter,
         name_filter=name_filter,
+        category_filter=category_filter,
         stock_filter=stock_filter,
         sort=sort,
         direction=direction,
