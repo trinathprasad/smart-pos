@@ -964,6 +964,89 @@ body.is-sidebar-collapsed .app-sidebar-link .bi {
     color: var(--brand-text) !important;
 }
 
+.product-form-shell {
+    max-width: 1120px;
+    margin: 0 auto;
+}
+
+.product-form-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    align-items: start;
+    gap: 1rem;
+}
+
+.product-form-section {
+    overflow: hidden;
+}
+
+.product-form-section-header {
+    min-height: 58px;
+    padding: 1rem 1.5rem;
+}
+
+.product-form-section-title,
+.product-profit-preview-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.2;
+}
+
+.product-form-section-title .bi,
+.product-profit-preview-title .bi {
+    color: var(--brand-primary-dark);
+    font-size: 1.15rem;
+    line-height: 1;
+}
+
+.product-pricing-section {
+    grid-column: 1;
+}
+
+.product-description-input {
+    min-height: 92px;
+    resize: vertical;
+}
+
+.product-profit-preview {
+    position: sticky;
+    top: 1rem;
+    grid-column: 2;
+    grid-row: 1 / span 3;
+}
+
+.product-profit-preview-title {
+    color: var(--brand-muted);
+    font-weight: 700;
+}
+
+.product-profit-preview-value {
+    margin-top: 1rem;
+    font-size: 1.85rem;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+.product-profit-preview-margin {
+    margin-top: 0.35rem;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.product-form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin-top: 1rem;
+}
+
+.product-form-actions .btn {
+    min-width: 150px;
+}
+
 .form-text {
     color: var(--brand-muted);
 }
@@ -1168,6 +1251,20 @@ body.is-sidebar-collapsed .app-sidebar-link .bi {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
+    .product-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .product-pricing-section,
+    .product-profit-preview {
+        grid-column: auto;
+        grid-row: auto;
+    }
+
+    .product-profit-preview {
+        position: static;
+    }
+
     .product-filter-main,
     .product-filter-actions {
         grid-column: 1 / -1;
@@ -1194,5 +1291,13 @@ body.is-sidebar-collapsed .app-sidebar-link .bi {
 
     .product-filter-actions {
         flex-direction: column;
+    }
+
+    .product-form-actions {
+        flex-direction: column;
+    }
+
+    .product-form-actions .btn {
+        width: 100%;
     }
 }

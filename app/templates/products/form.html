@@ -1,55 +1,220 @@
 {% extends "base.html" %}
 {% block title %}{{ "Edit Product" if product else "Add Product" }} | Local Shop Billing{% endblock %}
+{% block body_class %}page-products{% endblock %}
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-lg-8">
-        <div class="card">
-            <div class="card-body p-4">
-                <h1 class="h3 mb-4">{{ "Edit Product" if product else "Add Product" }}</h1>
-                <form method="post" class="row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label">SKU</label>
-                        <input type="text" name="sku" class="form-control" value="{{ product.sku if product else '' }}" required>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Product Name</label>
-                        <input type="text" name="name" class="form-control" value="{{ product.name if product else '' }}" required>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Barcode (Optional)</label>
-                        <input type="text" name="barcode" class="form-control" value="{{ product.barcode if product and product.barcode else '' }}">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Category</label>
-                        <input type="text" name="category" class="form-control" value="{{ product.category if product else '' }}">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Unit</label>
-                        <input type="text" name="unit" class="form-control" value="{{ product.unit if product else 'pcs' }}">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Purchase Price</label>
-                        <input type="number" name="purchase_price" step="0.01" min="0" class="form-control" value="{{ product.purchase_price if product else '' }}" required>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Selling Price</label>
-                        <input type="number" name="selling_price" step="0.01" min="0" class="form-control" value="{{ product.selling_price if product else '' }}" required>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Stock Qty</label>
-                        <input type="number" name="stock_qty" step="0.01" min="0" class="form-control" value="{{ product.stock_qty if product else '' }}" required>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Low Stock Alert At</label>
-                        <input type="number" name="low_stock_threshold" step="0.01" min="0" class="form-control" value="{{ product.low_stock_threshold if product else '0' }}" required>
-                    </div>
-                    <div class="col-12 d-flex gap-2">
-                        <button class="btn btn-primary">{{ "Update Product" if product else "Save Product" }}</button>
-                        <a href="{{ url_for('products.index') }}" class="btn btn-outline-secondary">Cancel</a>
-                    </div>
-                </form>
-            </div>
+<div class="product-form-shell">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h1 class="h3 mb-1">{{ "Edit Product" if product else "Add Product" }}</h1>
+            <p class="text-muted mb-0">{{ "Update product details, prices, and inventory." if product else "Create a product with pricing and inventory details." }}</p>
         </div>
+        <a href="{{ url_for('products.index') }}" class="btn btn-outline-secondary d-inline-flex align-items-center">
+            <i class="bi bi-arrow-left me-2"></i>
+            Back to Products
+        </a>
     </div>
+
+    <form method="post" class="product-form" data-profit-preview-form>
+        <div class="product-form-grid">
+            <section class="card product-form-section">
+                <div class="card-header product-form-section-header">
+                    <h2 class="product-form-section-title">
+                        <i class="bi bi-box-seam"></i>
+                        <span>Product Information</span>
+                    </h2>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label" for="productSku">SKU</label>
+                            <input id="productSku" type="text" name="sku" class="form-control" value="{{ product.sku if product else '' }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="productBarcode">Barcode (Optional)</label>
+                            <input id="productBarcode" type="text" name="barcode" class="form-control" value="{{ product.barcode if product and product.barcode else '' }}" autocomplete="off">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="productName">Product Name</label>
+                            <input id="productName" type="text" name="name" class="form-control" value="{{ product.name if product else '' }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="productCategory">Category</label>
+                            <input id="productCategory" type="text" name="category" class="form-control" value="{{ product.category if product else '' }}">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card product-form-section">
+                <div class="card-header product-form-section-header">
+                    <h2 class="product-form-section-title">
+                        <i class="bi bi-info-circle"></i>
+                        <span>Product Details</span>
+                    </h2>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label" for="productBrand">Brand (Optional)</label>
+                            <input id="productBrand" type="text" name="brand" class="form-control" value="{{ product.brand if product and product.brand else '' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="productUnit">Unit</label>
+                            <input id="productUnit" type="text" name="unit" class="form-control" value="{{ product.unit if product else 'pcs' }}">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label" for="productDescription">Description (Optional)</label>
+                            <textarea id="productDescription" name="description" class="form-control product-description-input" rows="3">{{ product.description if product and product.description else '' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card product-form-section product-pricing-section">
+                <div class="card-header product-form-section-header">
+                    <h2 class="product-form-section-title">
+                        <i class="bi bi-cash-stack"></i>
+                        <span>Pricing &amp; Inventory</span>
+                    </h2>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label" for="productPurchasePrice">Purchase Price</label>
+                            <input id="productPurchasePrice" type="number" name="purchase_price" step="0.01" min="0" class="form-control" value="{{ product.purchase_price if product else '' }}" required data-required-message="Purchase price is required." data-negative-message="Purchase price cannot be negative." data-profit-purchase>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="productSellingPrice">Selling Price</label>
+                            <input id="productSellingPrice" type="number" name="selling_price" step="0.01" min="0" class="form-control" value="{{ product.selling_price if product else '' }}" required data-required-message="Selling price is required." data-negative-message="Selling price cannot be negative." data-profit-selling>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="productStockQty">Stock Quantity</label>
+                            <input id="productStockQty" type="number" name="stock_qty" step="0.01" min="0" class="form-control" value="{{ product.stock_qty if product else '' }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="productLowStockThreshold">Low Stock Alert</label>
+                            <input id="productLowStockThreshold" type="number" name="low_stock_threshold" step="0.01" min="0" class="form-control" value="{{ product.low_stock_threshold if product else '0' }}" required>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <aside class="card product-profit-preview" aria-live="polite">
+                <div class="card-body p-4">
+                    <div class="product-profit-preview-title">
+                        <i class="bi bi-graph-up-arrow"></i>
+                        <span>Profit Preview</span>
+                    </div>
+                    <div class="product-profit-preview-value" data-profit-value>&#8377;0.00</div>
+                    <div class="product-profit-preview-margin" data-profit-margin>+0%</div>
+                    <div class="form-text mt-2">Calculated from purchase and selling price.</div>
+                </div>
+            </aside>
+        </div>
+
+        <div class="product-form-actions">
+            <button class="btn btn-primary d-inline-flex align-items-center justify-content-center">
+                <i class="bi bi-check-circle me-2"></i>
+                {{ "Update Product" if product else "Save Product" }}
+            </button>
+            <a href="{{ url_for('products.index') }}" class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center">
+                <i class="bi bi-x-circle me-2"></i>
+                Cancel
+            </a>
+        </div>
+    </form>
 </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        (function () {
+            var form = document.querySelector("[data-profit-preview-form]");
+            if (!form) {
+                return;
+            }
+
+            var purchaseInput = form.querySelector("[data-profit-purchase]");
+            var sellingInput = form.querySelector("[data-profit-selling]");
+            var profitValue = form.querySelector("[data-profit-value]");
+            var profitMargin = form.querySelector("[data-profit-margin]");
+
+            function formatAmount(value) {
+                return Math.abs(value).toFixed(2).replace(/\.00$/, "").replace(/(\.\d)0$/, "$1");
+            }
+
+            function formatCurrency(value) {
+                return (value < 0 ? "-&#8377;" : "&#8377;") + formatAmount(value);
+            }
+
+            function updatePriceValidity(input) {
+                if (input.value.trim() === "") {
+                    input.setCustomValidity(input.dataset.requiredMessage || "");
+                    return;
+                }
+
+                var value = parseFloat(input.value);
+                if (Number.isFinite(value) && value < 0) {
+                    input.setCustomValidity(input.dataset.negativeMessage || "");
+                    return;
+                }
+
+                input.setCustomValidity("");
+            }
+
+            function updateProfitPreview() {
+                updatePriceValidity(purchaseInput);
+                updatePriceValidity(sellingInput);
+
+                profitValue.classList.remove("text-success", "text-danger", "text-muted");
+                profitMargin.classList.remove("text-success", "text-danger", "text-muted");
+
+                if (purchaseInput.value.trim() === "" || sellingInput.value.trim() === "") {
+                    profitValue.innerHTML = "Profit: &mdash;";
+                    profitMargin.textContent = "Margin: N/A";
+                    profitValue.classList.add("text-muted");
+                    profitMargin.classList.add("text-muted");
+                    return;
+                }
+
+                var purchase = parseFloat(purchaseInput.value);
+                var selling = parseFloat(sellingInput.value);
+
+                if (!Number.isFinite(purchase) || !Number.isFinite(selling)) {
+                    profitValue.innerHTML = "Profit: &mdash;";
+                    profitMargin.textContent = "Margin: N/A";
+                    profitValue.classList.add("text-muted");
+                    profitMargin.classList.add("text-muted");
+                    return;
+                }
+
+                var profit = selling - purchase;
+                var tone = profit < 0 ? "text-danger" : "text-success";
+
+                profitValue.innerHTML = formatCurrency(profit);
+                profitValue.classList.add(tone);
+
+                if (purchase === 0) {
+                    profitMargin.textContent = "Margin: N/A";
+                    profitMargin.classList.add("text-muted");
+                    return;
+                }
+
+                var margin = (profit / purchase) * 100;
+                profitMargin.textContent = (margin > 0 ? "+" : "") + margin.toFixed(0) + "%";
+                profitMargin.classList.add(tone);
+            }
+
+            purchaseInput.addEventListener("input", updateProfitPreview);
+            sellingInput.addEventListener("input", updateProfitPreview);
+            purchaseInput.addEventListener("invalid", function () {
+                updatePriceValidity(purchaseInput);
+            });
+            sellingInput.addEventListener("invalid", function () {
+                updatePriceValidity(sellingInput);
+            });
+            updateProfitPreview();
+        })();
+    </script>
 {% endblock %}

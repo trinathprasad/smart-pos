@@ -60,6 +60,13 @@ def _barcode_exists(barcode: str | None, product_id: int | None = None) -> bool:
     return db.session.query(query.exists()).scalar()
 
 
+def _required_price(field_name: str, required_message: str):
+    raw_value = request.form.get(field_name)
+    if raw_value is None or raw_value.strip() == "":
+        return None, required_message
+    return to_decimal(raw_value), None
+
+
 @products_bp.route("/")
 def index():
     query = request.args.get("q", "").strip()
@@ -174,12 +181,24 @@ def create():
         if _barcode_exists(barcode):
             flash("Barcode already exists for another product.", "danger")
             return render_template("products/form.html", product=None)
-        purchase_price = to_decimal(request.form.get("purchase_price"))
-        selling_price = to_decimal(request.form.get("selling_price"))
+        purchase_price, price_error = _required_price("purchase_price", "Purchase price is required.")
+        if price_error:
+            flash(price_error, "danger")
+            return render_template("products/form.html", product=None)
+        selling_price, price_error = _required_price("selling_price", "Selling price is required.")
+        if price_error:
+            flash(price_error, "danger")
+            return render_template("products/form.html", product=None)
         stock_qty = to_decimal(request.form.get("stock_qty"))
         low_stock_threshold = to_decimal(request.form.get("low_stock_threshold"))
-        if purchase_price < 0 or selling_price < 0 or stock_qty < 0 or low_stock_threshold < 0:
-            flash("Prices, stock, and low stock values cannot be negative.", "danger")
+        if purchase_price < 0:
+            flash("Purchase price cannot be negative.", "danger")
+            return render_template("products/form.html", product=None)
+        if selling_price < 0:
+            flash("Selling price cannot be negative.", "danger")
+            return render_template("products/form.html", product=None)
+        if stock_qty < 0 or low_stock_threshold < 0:
+            flash("Stock and low stock values cannot be negative.", "danger")
             return render_template("products/form.html", product=None)
 
         product = Product(
@@ -187,7 +206,9 @@ def create():
             barcode=barcode,
             name=name,
             category=request.form.get("category", "").strip() or None,
+            brand=request.form.get("brand", "").strip() or None,
             unit=request.form.get("unit", "pcs").strip() or "pcs",
+            description=request.form.get("description", "").strip() or None,
             purchase_price=purchase_price,
             selling_price=selling_price,
             stock_qty=stock_qty,
@@ -219,18 +240,32 @@ def edit(product_id):
         if _barcode_exists(barcode, product.id):
             flash("Barcode already exists for another product.", "danger")
             return render_template("products/form.html", product=product)
-        purchase_price = to_decimal(request.form.get("purchase_price"))
-        selling_price = to_decimal(request.form.get("selling_price"))
+        purchase_price, price_error = _required_price("purchase_price", "Purchase price is required.")
+        if price_error:
+            flash(price_error, "danger")
+            return render_template("products/form.html", product=product)
+        selling_price, price_error = _required_price("selling_price", "Selling price is required.")
+        if price_error:
+            flash(price_error, "danger")
+            return render_template("products/form.html", product=product)
         stock_qty = to_decimal(request.form.get("stock_qty"))
         low_stock_threshold = to_decimal(request.form.get("low_stock_threshold"))
-        if purchase_price < 0 or selling_price < 0 or stock_qty < 0 or low_stock_threshold < 0:
-            flash("Prices, stock, and low stock values cannot be negative.", "danger")
+        if purchase_price < 0:
+            flash("Purchase price cannot be negative.", "danger")
+            return render_template("products/form.html", product=product)
+        if selling_price < 0:
+            flash("Selling price cannot be negative.", "danger")
+            return render_template("products/form.html", product=product)
+        if stock_qty < 0 or low_stock_threshold < 0:
+            flash("Stock and low stock values cannot be negative.", "danger")
             return render_template("products/form.html", product=product)
         product.sku = request.form.get("sku", "").strip()
         product.barcode = barcode
         product.name = request.form.get("name", "").strip()
         product.category = request.form.get("category", "").strip() or None
+        product.brand = request.form.get("brand", "").strip() or None
         product.unit = request.form.get("unit", "pcs").strip() or "pcs"
+        product.description = request.form.get("description", "").strip() or None
         product.purchase_price = purchase_price
         product.selling_price = selling_price
         product.stock_qty = stock_qty
