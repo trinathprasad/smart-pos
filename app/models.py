@@ -10,6 +10,7 @@ from .extensions import db
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     sku = db.Column(db.String(50), unique=True, nullable=False, index=True)
+    barcode = db.Column(db.String(80), unique=True, nullable=True, index=True)
     name = db.Column(db.String(120), nullable=False, index=True)
     category = db.Column(db.String(80), nullable=True, index=True)
     unit = db.Column(db.String(20), nullable=False, default="pcs")
@@ -32,8 +33,14 @@ class Product(db.Model):
 
     sale_items = db.relationship("SaleItem", back_populates="product")
 
+    def is_out_of_stock(self) -> bool:
+        return self.stock_qty <= 0
+
     def is_low_stock(self) -> bool:
-        return self.stock_qty <= self.low_stock_threshold
+        return self.stock_qty > 0 and self.stock_qty <= self.low_stock_threshold
+
+    def is_healthy_stock(self) -> bool:
+        return self.stock_qty > 0 and self.stock_qty > self.low_stock_threshold
 
 
 

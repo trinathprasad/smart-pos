@@ -55,7 +55,7 @@ def index():
     start_of_day, end_of_day = utc_bounds_for_local_date(local_today())
 
     product_count = Product.query.count()
-    low_stock_count = Product.query.filter(Product.stock_qty <= Product.low_stock_threshold).count()
+    low_stock_count = Product.query.filter(Product.stock_qty > 0, Product.stock_qty <= Product.low_stock_threshold).count()
 
     today_query = Sale.query.filter(Sale.created_at >= start_of_day, Sale.created_at <= end_of_day)
     sales_today = (

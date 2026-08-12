@@ -185,24 +185,19 @@
                         {% set sku_direction = 'desc' if sort == 'sku' and direction == 'asc' else 'asc' %}
                         <a class="text-decoration-none text-reset" href="{{ url_for('products.index', q=query, sku=sku_filter, name=name_filter, category=category_filter, filter=stock_filter, sort='sku', direction=sku_direction) }}">
                             SKU
-                            {% if sort == "sku" %}
-                                <span class="text-muted">{{ "Asc" if direction == "asc" else "Desc" }}</span>
-                            {% endif %}
                         </a>
                     </th>
                     <th>
                         {% set name_direction = 'desc' if sort == 'name' and direction == 'asc' else 'asc' %}
                         <a class="text-decoration-none text-reset" href="{{ url_for('products.index', q=query, sku=sku_filter, name=name_filter, category=category_filter, filter=stock_filter, sort='name', direction=name_direction) }}">
                             Name
-                            {% if sort == "name" %}
-                                <span class="text-muted">{{ "Asc" if direction == "asc" else "Desc" }}</span>
-                            {% endif %}
                         </a>
                     </th>
                     <th>Category</th>
                     <th>Unit</th>
                     <th>Purchase</th>
                     <th>Price</th>
+                    <th>Profit</th>
                     <th>Stock</th>
                     <th>Status</th>
                     <th></th>
@@ -217,24 +212,51 @@
                         <td>{{ product.unit }}</td>
                         <td>&#8377;{{ "%.2f"|format(product.purchase_price) }}</td>
                         <td>₹{{ "%.2f"|format(product.selling_price) }}</td>
-                        <td>{{ "%.2f"|format(product.stock_qty) }}</td>
                         <td>
-                            {% if product.is_low_stock() %}
-                                <span class="badge badge-low-stock">Low stock</span>
+                            {% set profit = product.selling_price - product.purchase_price %}
+                            {% if profit > 0 %}
+                                {% set profit_class = "text-success" %}
+                            {% elif profit < 0 %}
+                                {% set profit_class = "text-danger" %}
+                            {% else %}
+                                {% set profit_class = "text-muted" %}
+                            {% endif %}
+                            <div class="{{ profit_class }}">&#8377;{{ "%.2f"|format(profit) }}</div>
+                            <small class="{{ profit_class }}">
+                                {% if product.purchase_price > 0 %}
+                                    {% set profit_percent = (profit / product.purchase_price) * 100 %}
+                                    {{ "+" if profit_percent > 0 else "" }}{{ "%.0f"|format(profit_percent) }}%
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </small>
+                        </td>
+                        <td>{{ product.stock_qty|quantity }} {{ product.unit }}</td>
+                        <td>
+                            {% if product.is_out_of_stock() %}
+                                <span class="badge text-bg-danger">Out of Stock</span>
+                            {% elif product.is_low_stock() %}
+                                <span class="badge badge-low-stock">Low Stock</span>
                             {% else %}
                                 <span class="badge text-bg-success">Healthy</span>
                             {% endif %}
                         </td>
                         <td class="text-end">
-                            <a href="{{ url_for('products.edit', product_id=product.id) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                            <a href="{{ url_for('products.edit', product_id=product.id) }}" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-pencil me-1"></i>
+                                Edit
+                            </a>
                             <form action="{{ url_for('products.delete', product_id=product.id) }}" method="post" class="d-inline">
-                                <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this product?')">Delete</button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this product?')">
+                                    <i class="bi bi-trash me-1"></i>
+                                    Delete
+                                </button>
                             </form>
                         </td>
                     </tr>
                 {% else %}
                     <tr>
-                        <td colspan="9" class="text-center py-4 text-muted">No products added yet.</td>
+                        <td colspan="10" class="text-center py-4 text-muted">No products added yet.</td>
                     </tr>
                 {% endfor %}
             </tbody>

@@ -57,6 +57,9 @@ def create_app(config_class=Config):
             db.session.execute(
                 text("ALTER TABLE product ADD COLUMN purchase_price NUMERIC(10, 2) NOT NULL DEFAULT 0.00")
             )
+        if "barcode" not in product_columns:
+            db.session.execute(text("ALTER TABLE product ADD COLUMN barcode VARCHAR(80)"))
+            db.session.execute(text("CREATE UNIQUE INDEX IF NOT EXISTS ix_product_barcode ON product (barcode)"))
         if "is_active" not in product_columns:
             db.session.execute(text("ALTER TABLE product ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT 1"))
             db.session.commit()

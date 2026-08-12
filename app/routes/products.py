@@ -39,11 +39,25 @@ def _product_statistics():
     )
     return {
         "total_products": len(products),
-        "low_stock": sum(1 for product in products if product.stock_qty <= product.low_stock_threshold),
-        "out_of_stock": sum(1 for product in products if product.stock_qty == 0),
+        "low_stock": sum(1 for product in products if product.is_low_stock()),
+        "out_of_stock": sum(1 for product in products if product.is_out_of_stock()),
         "inventory_value": inventory_value,
         "inventory_value_display": _format_indian_number(inventory_value),
     }
+
+
+def _clean_barcode(value: str | None) -> str | None:
+    barcode = (value or "").strip()
+    return barcode or None
+
+
+def _barcode_exists(barcode: str | None, product_id: int | None = None) -> bool:
+    if not barcode:
+        return False
+    query = Product.query.filter(Product.barcode == barcode)
+    if product_id is not None:
+        query = query.filter(Product.id != product_id)
+    return db.session.query(query.exists()).scalar()
 
 
 @products_bp.route("/")
@@ -86,11 +100,11 @@ def index():
     if category_filter:
         product_query = product_query.filter(Product.category == category_filter)
     if stock_filter == "healthy":
-        product_query = product_query.filter(Product.stock_qty > Product.low_stock_threshold)
+        product_query = product_query.filter(Product.stock_qty > 0, Product.stock_qty > Product.low_stock_threshold)
     elif stock_filter == "low_stock":
-        product_query = product_query.filter(Product.stock_qty <= Product.low_stock_threshold)
+        product_query = product_query.filter(Product.stock_qty > 0, Product.stock_qty <= Product.low_stock_threshold)
     elif stock_filter == "out_of_stock":
-        product_query = product_query.filter(Product.stock_qty == 0)
+        product_query = product_query.filter(Product.stock_qty <= 0)
 
     sort_column = sort_columns[sort]
     order_expression = sort_column.desc() if direction == "desc" else sort_column.asc()
@@ -153,8 +167,12 @@ def create():
     if request.method == "POST":
         sku = request.form.get("sku", "").strip()
         name = request.form.get("name", "").strip()
+        barcode = _clean_barcode(request.form.get("barcode"))
         if not sku or not name:
             flash("SKU and product name are required.", "danger")
+            return render_template("products/form.html", product=None)
+        if _barcode_exists(barcode):
+            flash("Barcode already exists for another product.", "danger")
             return render_template("products/form.html", product=None)
         purchase_price = to_decimal(request.form.get("purchase_price"))
         selling_price = to_decimal(request.form.get("selling_price"))
@@ -166,6 +184,7 @@ def create():
 
         product = Product(
             sku=sku,
+            barcode=barcode,
             name=name,
             category=request.form.get("category", "").strip() or None,
             unit=request.form.get("unit", "pcs").strip() or "pcs",
@@ -180,7 +199,9 @@ def create():
         except IntegrityError as exc:
             db.session.rollback()
             error_text = str(exc.orig).lower()
-            if "product.sku" in error_text or "unique constraint failed" in error_text:
+            if "barcode" in error_text:
+                flash("Barcode already exists for another product.", "danger")
+            elif "sku" in error_text or "unique constraint failed" in error_text:
                 flash("SKU must be unique. This code already exists.", "danger")
             else:
                 flash(f"Could not save product: {exc.orig}", "danger")
@@ -194,6 +215,10 @@ def create():
 def edit(product_id):
     product = Product.query.get_or_404(product_id)
     if request.method == "POST":
+        barcode = _clean_barcode(request.form.get("barcode"))
+        if _barcode_exists(barcode, product.id):
+            flash("Barcode already exists for another product.", "danger")
+            return render_template("products/form.html", product=product)
         purchase_price = to_decimal(request.form.get("purchase_price"))
         selling_price = to_decimal(request.form.get("selling_price"))
         stock_qty = to_decimal(request.form.get("stock_qty"))
@@ -202,6 +227,7 @@ def edit(product_id):
             flash("Prices, stock, and low stock values cannot be negative.", "danger")
             return render_template("products/form.html", product=product)
         product.sku = request.form.get("sku", "").strip()
+        product.barcode = barcode
         product.name = request.form.get("name", "").strip()
         product.category = request.form.get("category", "").strip() or None
         product.unit = request.form.get("unit", "pcs").strip() or "pcs"
@@ -214,7 +240,9 @@ def edit(product_id):
         except IntegrityError as exc:
             db.session.rollback()
             error_text = str(exc.orig).lower()
-            if "product.sku" in error_text or "unique constraint failed" in error_text:
+            if "barcode" in error_text:
+                flash("Barcode already exists for another product.", "danger")
+            elif "sku" in error_text or "unique constraint failed" in error_text:
                 flash("SKU must be unique. This code already exists.", "danger")
             else:
                 flash(f"Could not update product: {exc.orig}", "danger")
