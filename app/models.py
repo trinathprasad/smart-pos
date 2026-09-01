@@ -35,6 +35,14 @@ class Product(db.Model):
 
     sale_items = db.relationship("SaleItem", back_populates="product")
 
+    @classmethod
+    def active_query(cls):
+        return cls.query.filter_by(is_active=True)
+
+    @classmethod
+    def active_count(cls) -> int:
+        return cls.active_query().count()
+
     def is_out_of_stock(self) -> bool:
         return self.stock_qty <= 0
 
