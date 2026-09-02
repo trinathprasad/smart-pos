@@ -50,6 +50,10 @@ def validate_customer_form(name: str, phone: str | None) -> bool:
 @customers_bp.route("/")
 def index():
     query = request.args.get("q", "").strip()
+    balance_filter = request.args.get("filter", "").strip().lower()
+    if balance_filter not in {"pending", "no_pending"}:
+        balance_filter = ""
+
     active_customers = Customer.query.filter_by(is_active=True).all()
     customer_query = Customer.query.filter_by(is_active=True)
     if query:
@@ -59,11 +63,18 @@ def index():
         )
 
     customers = customer_query.order_by(Customer.name.asc()).all()
+    balances = {customer.id: customer_balance(customer) for customer in customers}
+    if balance_filter == "pending":
+        customers = [customer for customer in customers if balances[customer.id] > 0]
+    elif balance_filter == "no_pending":
+        customers = [customer for customer in customers if balances[customer.id] == 0]
+
     return render_template(
         "customers/index.html",
         customers=customers,
         customer_stats=_customer_statistics(active_customers),
-        balances={customer.id: customer_balance(customer) for customer in customers},
+        balances=balances,
+        balance_filter=balance_filter,
         query=query,
     )
 
