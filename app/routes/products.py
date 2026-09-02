@@ -8,27 +8,10 @@ from sqlalchemy.exc import IntegrityError
 
 from ..extensions import db
 from ..models import Product, SaleItem
-from ..utils import to_decimal
+from ..utils import format_indian_number, to_decimal
 
 
 products_bp = Blueprint("products", __name__, url_prefix="/products")
-
-
-def _format_indian_number(value: Decimal) -> str:
-    amount = to_decimal(value)
-    sign = "-" if amount < 0 else ""
-    whole, fraction = f"{abs(amount):.2f}".split(".")
-    if len(whole) > 3:
-        leading = whole[:-3]
-        trailing = whole[-3:]
-        groups = []
-        while len(leading) > 2:
-            groups.insert(0, leading[-2:])
-            leading = leading[:-2]
-        if leading:
-            groups.insert(0, leading)
-        whole = f"{','.join(groups)},{trailing}"
-    return f"{sign}{whole}.{fraction}"
 
 
 def _product_statistics():
@@ -42,7 +25,7 @@ def _product_statistics():
         "low_stock": sum(1 for product in products if product.is_low_stock()),
         "out_of_stock": sum(1 for product in products if product.is_out_of_stock()),
         "inventory_value": inventory_value,
-        "inventory_value_display": _format_indian_number(inventory_value),
+        "inventory_value_display": format_indian_number(inventory_value),
     }
 
 

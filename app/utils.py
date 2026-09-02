@@ -14,6 +14,23 @@ def to_decimal(value, default: str = "0.00") -> Decimal:
         return Decimal(default).quantize(TWOPLACES, rounding=ROUND_HALF_UP)
 
 
+def format_indian_number(value) -> str:
+    amount = to_decimal(value)
+    sign = "-" if amount < 0 else ""
+    whole, fraction = f"{abs(amount):.2f}".split(".")
+    if len(whole) > 3:
+        leading = whole[:-3]
+        trailing = whole[-3:]
+        groups = []
+        while len(leading) > 2:
+            groups.insert(0, leading[-2:])
+            leading = leading[:-2]
+        if leading:
+            groups.insert(0, leading)
+        whole = f"{','.join(groups)},{trailing}"
+    return f"{sign}{whole}.{fraction}"
+
+
 def format_quantity(value) -> str:
     quantity = to_decimal(value)
     return format(quantity.normalize(), "f")

@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 
 from ..extensions import db
 from ..models import Customer, CustomerLedger, Sale
-from ..utils import to_decimal
+from ..utils import format_indian_number, to_decimal
 
 
 customers_bp = Blueprint("customers", __name__, url_prefix="/customers")
@@ -17,6 +17,18 @@ PHONE_RE = re.compile(r"^\d{10}$")
 
 def customer_balance(customer: Customer) -> Decimal:
     return customer.balance_due
+
+
+def _customer_statistics(customers: list[Customer]):
+    balances = {customer.id: customer_balance(customer) for customer in customers}
+    total_pending = sum(balances.values(), start=Decimal("0.00"))
+    return {
+        "total_customers": len(customers),
+        "total_pending": total_pending,
+        "total_pending_display": format_indian_number(total_pending),
+        "no_pending": sum(1 for balance in balances.values() if balance == 0),
+        "pending_customers": sum(1 for balance in balances.values() if balance > 0),
+    }
 
 
 def validate_customer_form(name: str, phone: str | None) -> bool:
@@ -38,6 +50,7 @@ def validate_customer_form(name: str, phone: str | None) -> bool:
 @customers_bp.route("/")
 def index():
     query = request.args.get("q", "").strip()
+    active_customers = Customer.query.filter_by(is_active=True).all()
     customer_query = Customer.query.filter_by(is_active=True)
     if query:
         like = f"%{query}%"
@@ -49,6 +62,7 @@ def index():
     return render_template(
         "customers/index.html",
         customers=customers,
+        customer_stats=_customer_statistics(active_customers),
         balances={customer.id: customer_balance(customer) for customer in customers},
         query=query,
     )

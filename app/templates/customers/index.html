@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Customers | Local Shop Billing{% endblock %}
+{% block body_class %}page-customers{% endblock %}
 {% block content %}
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
     <div>
@@ -7,6 +8,57 @@
         <p class="text-muted mb-0">Manage customer records and pending balances.</p>
     </div>
     <a href="{{ url_for('customers.create') }}" class="btn btn-primary">Add Customer</a>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-12 col-sm-6 col-xl-3">
+        <a class="card stat-card dashboard-stat-link" href="{{ url_for('customers.index') }}" title="View all customers" aria-label="View all customers" data-bs-toggle="tooltip" data-bs-delay='{"show":300,"hide":100}'>
+            <div class="card-body">
+                <div class="kpi-card-title">
+                    <i class="bi bi-people text-primary"></i>
+                    <span>Total Customers</span>
+                </div>
+                <h2 class="mb-1 stat-value stat-value-products">{{ customer_stats.total_customers }}</h2>
+                <p class="kpi-comparison text-muted mb-0">All registered customers</p>
+            </div>
+        </a>
+    </div>
+    <div class="col-12 col-sm-6 col-xl-3">
+        <a class="card stat-card dashboard-stat-link" href="{{ url_for('customers.index') }}" title="View customer balances" aria-label="View customer balances" data-bs-toggle="tooltip" data-bs-delay='{"show":300,"hide":100}'>
+            <div class="card-body">
+                <div class="kpi-card-title">
+                    <i class="bi bi-cash-stack text-success"></i>
+                    <span>Total Pending</span>
+                </div>
+                <h2 class="mb-1 stat-value stat-value-revenue">&#8377;{{ customer_stats.total_pending_display }}</h2>
+                <p class="kpi-comparison text-muted mb-0">Outstanding customer balance</p>
+            </div>
+        </a>
+    </div>
+    <div class="col-12 col-sm-6 col-xl-3">
+        <a class="card stat-card dashboard-stat-link" href="{{ url_for('customers.index') }}" title="View customers with no pending balance" aria-label="View customers with no pending balance" data-bs-toggle="tooltip" data-bs-delay='{"show":300,"hide":100}'>
+            <div class="card-body">
+                <div class="kpi-card-title">
+                    <i class="bi bi-check-circle text-success"></i>
+                    <span>No Pending</span>
+                </div>
+                <h2 class="mb-1 stat-value stat-value-inventory">{{ customer_stats.no_pending }}</h2>
+                <p class="kpi-comparison text-muted mb-0">Customers with no pending balance</p>
+            </div>
+        </a>
+    </div>
+    <div class="col-12 col-sm-6 col-xl-3">
+        <a class="card stat-card dashboard-stat-link" href="{{ url_for('customers.index') }}" title="View pending customers" aria-label="View pending customers" data-bs-toggle="tooltip" data-bs-delay='{"show":300,"hide":100}'>
+            <div class="card-body">
+                <div class="kpi-card-title">
+                    <i class="bi bi-exclamation-triangle text-warning"></i>
+                    <span>Pending Customers</span>
+                </div>
+                <h2 class="mb-1 stat-value stat-value-low-stock-alert">{{ customer_stats.pending_customers }}</h2>
+                <p class="kpi-comparison text-muted mb-0">Customers with outstanding balance</p>
+            </div>
+        </a>
+    </div>
 </div>
 
 <div class="card mb-4">
