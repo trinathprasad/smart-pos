@@ -67,6 +67,12 @@ def create_app(config_class=Config):
         if "is_active" not in product_columns:
             db.session.execute(text("ALTER TABLE product ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT 1"))
             db.session.commit()
+        customer_columns = {column["name"] for column in inspector.get_columns("customer")}
+        if "archived_phone" not in customer_columns:
+            db.session.execute(text("ALTER TABLE customer ADD COLUMN archived_phone VARCHAR(30)"))
+        db.session.execute(
+            text("UPDATE customer SET archived_phone = phone, phone = NULL WHERE is_active = 0 AND phone IS NOT NULL")
+        )
         sale_item_columns = {column["name"] for column in inspector.get_columns("sale_item")}
         if "purchase_price" not in sale_item_columns:
             db.session.execute(

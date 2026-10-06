@@ -46,6 +46,11 @@ def validate_customer_form(name: str, phone: str | None) -> bool:
         return False
     return True
 
+def active_customer_with_phone(phone: str, exclude_customer_id: int | None = None) -> Customer | None:
+    query = Customer.query.filter_by(phone=phone, is_active=True)
+    if exclude_customer_id is not None:
+        query = query.filter(Customer.id != exclude_customer_id)
+    return query.first()
 
 @customers_bp.route("/")
 def index():
@@ -88,7 +93,9 @@ def create():
         form_data = {"name": name, "phone": phone, "address": address}
         if not validate_customer_form(name, phone):
             return render_template("customers/form.html", customer=None, form_data=form_data)
-
+        if active_customer_with_phone(phone):
+            flash("This phone number is already assigned to another customer.", "danger")
+            return render_template("customers/form.html", customer=None, form_data=form_data)
         customer = Customer(name=name, phone=phone, address=address)
         try:
             db.session.add(customer)
@@ -125,6 +132,9 @@ def edit(customer_id):
         address = request.form.get("address", "").strip() or None
         form_data = {"name": name, "phone": phone, "address": address}
         if not validate_customer_form(name, phone):
+            return render_template("customers/form.html", customer=customer, form_data=form_data)
+        if active_customer_with_phone(phone, exclude_customer_id=customer.id):
+            flash("This phone number is already assigned to another customer.", "danger")
             return render_template("customers/form.html", customer=customer, form_data=form_data)
         customer.name = name
         customer.phone = phone
@@ -187,6 +197,8 @@ def add_ledger_entry(customer_id):
 def delete(customer_id):
     customer = Customer.query.get_or_404(customer_id)
     if customer.sales or customer.ledger_entries:
+        customer.archived_phone = customer.phone
+        customer.phone = None
         customer.is_active = False
         db.session.commit()
         flash("Customer was deactivated because they have billing history.", "info")

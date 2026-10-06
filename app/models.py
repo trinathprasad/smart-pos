@@ -114,6 +114,7 @@ class Customer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), nullable=False, index=True)
     phone = db.Column(db.String(30), nullable=True, unique=True, index=True)
+    archived_phone = db.Column(db.String(30), nullable=True)
     address = db.Column(db.Text, nullable=True)
     is_active = db.Column(db.Boolean, nullable=False, default=True, index=True)
     created_at = db.Column(
