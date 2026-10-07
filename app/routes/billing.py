@@ -46,7 +46,10 @@ def new_bill():
             )
         if customer:
             customer_name = customer.name
-            previous_pending_amount = to_decimal("0")
+            # The existing customer balance is already represented in the ledger.
+            # Use it for this bill's payable display, but do not create another
+            # ledger debit for it below.
+            previous_pending_amount = to_decimal(customer.balance_due)
 
         if payment_status not in PAYMENT_STATUSES:
             flash("Choose a valid payment status.", "danger")

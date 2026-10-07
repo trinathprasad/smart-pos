@@ -91,7 +91,7 @@ function updateCustomerSelection() {
 
     previousPendingInput.disabled = hasCustomer;
     if (hasCustomer) {
-        previousPendingInput.value = "0.00";
+        previousPendingInput.value = balance.toFixed(2);
     }
     if (customerBalance) {
         customerBalance.hidden = !hasCustomer;
