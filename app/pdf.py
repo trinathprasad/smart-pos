@@ -17,7 +17,7 @@ from reportlab.platypus import (
 from .utils import format_bill_datetime, format_quantity_with_unit
 
 
-PINK = colors.HexColor("#d91b8c")
+PINK = colors.HexColor("#18B5E5")
 DARK = colors.HexColor("#222222")
 LIGHT = colors.HexColor("#f4f8f8")
 MUTED = colors.HexColor("#666666")
