@@ -12,12 +12,42 @@ from ..utils import format_bill_datetime, local_today, utc_bounds_for_local_date
 
 
 reports_bp = Blueprint("reports", __name__, url_prefix="/reports")
+def _report_date(value):
+    if not value:
+        return local_today()
+    try:
+        return datetime.strptime(value, "%Y-%m-%d").date()
+    except (TypeError, ValueError):
+        return local_today()
+
+
+def _daily_balance_due(sales):
+    saved_customer_sales = {}
+    walk_in_due = Decimal("0.00")
+
+    for sale in sales:
+        if sale.customer_id is None:
+            walk_in_due += sale.balance_due
+            continue
+        saved_customer_sales.setdefault(sale.customer_id, []).append(sale)
+
+    customer_due = Decimal("0.00")
+    for customer_sales in saved_customer_sales.values():
+        customer_sales.sort(key=lambda sale: sale.created_at)
+        customer_due += customer_sales[0].previous_pending_amount
+        customer_due += sum(
+            (sale.grand_total - sale.paid_amount for sale in customer_sales),
+            start=Decimal("0.00"),
+        )
+
+    return walk_in_due + customer_due
 
 
 @reports_bp.route("/daily")
 def daily():
     selected_date = request.args.get("date") or local_today().isoformat()
-    report_date = datetime.strptime(selected_date, "%Y-%m-%d").date()
+    report_date = _report_date(selected_date)
+    selected_date = report_date.isoformat()
     start_of_day, end_of_day = utc_bounds_for_local_date(report_date)
 
     sales = (
@@ -41,7 +71,7 @@ def daily():
 
     total_sales = sum((sale.grand_total for sale in sales), start=Decimal("0.00"))
     total_tax = sum((sale.tax_amount for sale in sales), start=Decimal("0.00"))
-    total_due = sum((sale.balance_due for sale in sales), start=Decimal("0.00"))
+    total_due = _daily_balance_due(sales)
     total_profit = sum(
         (item.line_profit for sale in sales for item in sale.items),
         start=Decimal("0.00"),
@@ -61,7 +91,8 @@ def daily():
 @reports_bp.route("/daily/export")
 def export_daily():
     selected_date = request.args.get("date") or local_today().isoformat()
-    report_date = datetime.strptime(selected_date, "%Y-%m-%d").date()
+    report_date = _report_date(selected_date)
+    selected_date = report_date.isoformat()
     start_of_day, end_of_day = utc_bounds_for_local_date(report_date)
     sales = (
         Sale.query.filter(Sale.created_at >= start_of_day, Sale.created_at <= end_of_day)
@@ -82,6 +113,7 @@ def export_daily():
             "Subtotal",
             "Tax",
             "Grand Total",
+            "Previous Pending",
             "Paid Amount",
             "Balance Due",
         ]
@@ -98,6 +130,7 @@ def export_daily():
                 sale.subtotal,
                 sale.tax_amount,
                 sale.grand_total,
+                sale.previous_pending_amount,
                 sale.paid_amount,
                 sale.balance_due,
             ]
