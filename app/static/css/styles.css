@@ -553,6 +553,35 @@ body.is-sidebar-collapsed .app-sidebar-link .bi {
 .stat-card .card-body {
     padding: 1.25rem;
 }
+.daily-statistics > [class*="col-"] {
+    display: flex;
+}
+
+.daily-stat-card {
+    width: 100%;
+}
+
+.daily-stat-card .card-body {
+    display: flex;
+    flex-direction: column;
+}
+
+.daily-stat-value-bills {
+    color: #3B82F6;
+}
+
+.daily-stat-value-sales,
+.daily-stat-value-profit {
+    color: var(--brand-success);
+}
+
+.daily-stat-value-tax {
+    color: #8B5CF6;
+}
+
+.daily-stat-value-outstanding {
+    color: var(--brand-warning);
+}
 
 .dashboard-stat-link {
     height: 100%;

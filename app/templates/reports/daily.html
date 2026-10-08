@@ -22,50 +22,53 @@
     </div>
 </div>
 
-<div class="row g-4 mb-4">
-    <div class="col-md-3 col-lg">
-        <div class="card stat-card">
+<div class="row g-4 mb-4 daily-statistics">
+    <div class="col-12 col-sm-6 col-lg">
+        <div class="card stat-card daily-stat-card h-100">
             <div class="card-body">
-                <p class="text-muted mb-2">Bills</p>
-                <h2 class="mb-0">{{ sales|length }}</h2>
+                <div class="kpi-card-title">Bills</div>
+                <h2 class="mb-1 stat-value daily-stat-value-bills">{{ sales|length }}</h2>
+                <p class="kpi-comparison text-muted mb-0" aria-hidden="true">&nbsp;</p>
             </div>
         </div>
     </div>
-    <div class="col-md-3 col-lg">
-        <div class="card stat-card">
+    <div class="col-12 col-sm-6 col-lg">
+        <div class="card stat-card daily-stat-card h-100">
             <div class="card-body">
-                <p class="text-muted mb-2">Total Sales</p>
-                <h2 class="mb-0">₹{{ "%.2f"|format(total_sales) }}</h2>
+                <div class="kpi-card-title">Total Sales</div>
+                <h2 class="mb-1 stat-value daily-stat-value-sales">&#8377;{{ "%.2f"|format(total_sales) }}</h2>
+                <p class="kpi-comparison text-muted mb-0" aria-hidden="true">&nbsp;</p>
             </div>
         </div>
     </div>
-    <div class="col-md-3 col-lg">
-        <div class="card stat-card">
+    <div class="col-12 col-sm-6 col-lg">
+        <div class="card stat-card daily-stat-card h-100">
             <div class="card-body">
-                <p class="text-muted mb-2">Tax Collected</p>
-                <h2 class="mb-0">₹{{ "%.2f"|format(total_tax) }}</h2>
+                <div class="kpi-card-title">Tax Collected</div>
+                <h2 class="mb-1 stat-value daily-stat-value-tax">&#8377;{{ "%.2f"|format(total_tax) }}</h2>
+                <p class="kpi-comparison text-muted mb-0" aria-hidden="true">&nbsp;</p>
             </div>
         </div>
     </div>
-    <div class="col-md-3 col-lg">
-        <div class="card stat-card">
+    <div class="col-12 col-sm-6 col-lg">
+        <div class="card stat-card daily-stat-card h-100">
             <div class="card-body">
-                <p class="text-muted mb-2">Current Outstanding</p>
-                <h2 class="mb-0">&#8377;{{ "%.2f"|format(total_due) }}</h2>
-                <p class="text-muted small mb-0">Net outstanding after selected day's bills</p>
+                <div class="kpi-card-title">Current Outstanding</div>
+                <h2 class="mb-1 stat-value daily-stat-value-outstanding">&#8377;{{ "%.2f"|format(total_due) }}</h2>
+                <p class="kpi-comparison text-muted mb-0">Net outstanding after selected day's bills</p>
             </div>
         </div>
     </div>
-    <div class="col-md-3 col-lg" id="daily-profit" tabindex="-1">
-        <div class="card stat-card">
+    <div class="col-12 col-sm-6 col-lg" id="daily-profit" tabindex="-1">
+        <div class="card stat-card daily-stat-card h-100">
             <div class="card-body">
-                <p class="text-muted mb-2">Profit</p>
-                <h2 class="mb-0">&#8377;{{ "%.2f"|format(total_profit) }}</h2>
+                <div class="kpi-card-title">Profit</div>
+                <h2 class="mb-1 stat-value daily-stat-value-profit">&#8377;{{ "%.2f"|format(total_profit) }}</h2>
+                <p class="kpi-comparison text-muted mb-0" aria-hidden="true">&nbsp;</p>
             </div>
         </div>
     </div>
 </div>
-
 <div class="row g-4">
     <div class="col-lg-7">
         <div class="card">
