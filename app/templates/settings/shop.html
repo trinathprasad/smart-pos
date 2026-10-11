@@ -113,7 +113,12 @@
             </div>
 
             <div class="text-center mt-4">
-                <button class="btn btn-primary px-4">Save Settings</button>
+                <div class="d-flex justify-content-center gap-2 flex-wrap">
+                    <button type="button" class="btn btn-outline-primary px-4" id="previewInvoiceButton">
+                        <i class="bi bi-eye me-2" aria-hidden="true"></i>Preview Invoice
+                    </button>
+                    <button class="btn btn-primary px-4">Save Settings</button>
+                </div>
             </div>
 
             <div class="modal fade" id="removeLogoModal" tabindex="-1" aria-labelledby="removeLogoModalLabel" aria-hidden="true">
@@ -133,6 +138,56 @@
                     </div>
                 </div>
             </div>
+            <div class="modal fade" id="invoicePreviewModal" tabindex="-1" aria-labelledby="invoicePreviewModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2 class="modal-title h5" id="invoicePreviewModalLabel">Invoice Preview</h2>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="alert alert-danger d-none" role="alert" id="invoicePreviewAlert"></div>
+                            <div class="card invoice-card mb-0" id="invoicePreviewCard">
+                                <div class="card-body p-4 p-lg-5">
+                                    <div class="row mb-4">
+                                        <div class="col-md-7">
+                                            <img class="d-none mb-3" id="previewInvoiceLogo" alt="Shop logo preview" style="max-width: 160px; max-height: 80px; object-fit: contain;">
+                                            <h2 class="h4 mb-1" id="previewShopName"></h2>
+                                            <p class="mb-1" id="previewAddress"></p>
+                                            <p class="mb-0" id="previewPhone"></p>
+                                        </div>
+                                        <div class="col-md-5 text-md-end">
+                                            <p class="mb-1"><strong>Invoice:</strong> <span id="previewInvoiceNumber"></span></p>
+                                            <p class="mb-1"><strong>Date:</strong> <span id="previewInvoiceDate"></span></p>
+                                            <p class="mb-0"><strong>Customer:</strong> Sample Customer</p>
+                                            <p class="mb-1 mt-3"><strong>Payment:</strong> Paid by Cash</p>
+                                            <p class="mb-0"><strong>Details:</strong> Preview payment</p>
+                                        </div>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table">
+                                            <thead><tr><th>Item</th><th class="text-end">Qty</th><th class="text-end">Rate</th><th class="text-end">Total</th></tr></thead>
+                                            <tbody>
+                                                <tr><td>Sample Product</td><td class="text-end">2 pcs</td><td class="text-end">Rs 750.00</td><td class="text-end">Rs 1,500.00</td></tr>
+                                                <tr><td>Sample Accessory</td><td class="text-end">1 pcs</td><td class="text-end">Rs 250.00</td><td class="text-end">Rs 250.00</td></tr>
+                                            </tbody>
+                                            <tfoot>
+                                                <tr><th colspan="3" class="text-end">Subtotal</th><th class="text-end" id="previewSubtotal"></th></tr>
+                                                <tr><th colspan="3" class="text-end">Tax (<span id="previewTaxPercent"></span>%)</th><th class="text-end" id="previewTaxAmount"></th></tr>
+                                                <tr><th colspan="3" class="text-end">Grand Total</th><th class="text-end" id="previewGrandTotal"></th></tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                    <p class="text-center text-muted mt-4 mb-0" id="previewFooterNote"></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </form>
     </div>
 </div>
@@ -141,6 +196,7 @@
 {% block scripts %}
 <script>
     (function () {
+        var form = document.getElementById("shopSettingsForm");
         var logoInput = document.querySelector("[data-logo-input]");
         var logoTrigger = document.querySelector("[data-logo-trigger]");
         var logoCard = document.querySelector("[data-logo-card]");
@@ -148,12 +204,27 @@
         var previewImage = document.querySelector("[data-logo-preview-image]");
         var placeholder = document.querySelector("[data-logo-placeholder]");
         var removeTrigger = document.querySelector("[data-logo-remove-trigger]");
+        var removeSubmit = document.querySelector("[name='remove_shop_logo']");
+        var previewButton = document.getElementById("previewInvoiceButton");
+        var previewModalElement = document.getElementById("invoicePreviewModal");
+        var previewAlert = document.getElementById("invoicePreviewAlert");
+        var previewLogo = document.getElementById("previewInvoiceLogo");
         var allowedExtensions = ["png", "jpg", "jpeg"];
         var allowedTypes = ["image/png", "image/jpeg"];
         var maxLogoBytes = 2097152;
+        var temporaryLogoUrl = null;
+        var logoRemovedForPreview = false;
 
-        if (!logoInput || !logoTrigger || !logoCard || !logoAlert || !previewImage || !placeholder || !removeTrigger) {
+        if (!form) {
             return;
+        }
+
+        function field(name) {
+            return form.elements[name];
+        }
+
+        function setText(id, value) {
+            document.getElementById(id).textContent = value;
         }
 
         function showLogoAlert() {
@@ -169,34 +240,114 @@
             return allowedExtensions.indexOf(extension) !== -1 && allowedTypes.indexOf(file.type) !== -1;
         }
 
-        logoTrigger.addEventListener("click", function () {
-            logoInput.click();
-        });
+        function setPreviewLogo() {
+            var source = "";
+            if (!logoRemovedForPreview && previewImage && !previewImage.classList.contains("d-none")) {
+                source = previewImage.src;
+            }
+            if (source) {
+                previewLogo.src = source;
+                previewLogo.classList.remove("d-none");
+            } else {
+                previewLogo.removeAttribute("src");
+                previewLogo.classList.add("d-none");
+            }
+        }
 
-        logoCard.addEventListener("keydown", function (event) {
-            if (event.key === "Enter" || event.key === " ") {
-                event.preventDefault();
+        function showPreviewError(message) {
+            previewAlert.textContent = message;
+            previewAlert.classList.remove("d-none");
+        }
+
+        function clearPreviewError() {
+            previewAlert.textContent = "";
+            previewAlert.classList.add("d-none");
+        }
+
+        function updateInvoicePreview() {
+            var taxValue = field("tax_percent").value.trim();
+            var tax = Number(taxValue);
+            if (!taxValue || !/^[+]?(?:\d+\.?\d*|\.\d+)$/.test(taxValue) || !Number.isFinite(tax) || tax < 0 || tax > 100) {
+                showPreviewError("Enter a tax percentage from 0 to 100 before opening the preview.");
+                return false;
+            }
+
+            clearPreviewError();
+            var subtotal = 1750;
+            var taxAmount = Math.round(subtotal * tax) / 100;
+            var grandTotal = subtotal + taxAmount;
+            var prefix = field("invoice_prefix").value.trim() || "INV";
+            setText("previewShopName", field("shop_name").value.trim() || "Shop name");
+            setText("previewAddress", field("address").value.trim());
+            setText("previewPhone", field("phone").value.trim());
+            setText("previewInvoiceNumber", prefix.toUpperCase() + "-PREVIEW");
+            setText("previewInvoiceDate", new Intl.DateTimeFormat(undefined, { year: "numeric", month: "short", day: "2-digit" }).format(new Date()));
+            setText("previewTaxPercent", tax.toFixed(2));
+            setText("previewSubtotal", "Rs " + subtotal.toFixed(2));
+            setText("previewTaxAmount", "Rs " + taxAmount.toFixed(2));
+            setText("previewGrandTotal", "Rs " + grandTotal.toFixed(2));
+            setText("previewFooterNote", field("footer_note").value);
+            setPreviewLogo();
+            return true;
+        }
+
+        if (field("address")) {
+            document.getElementById("previewAddress").style.whiteSpace = "pre-line";
+        }
+        document.getElementById("previewFooterNote").style.whiteSpace = "pre-line";
+
+        if (logoInput && logoTrigger && logoCard && logoAlert && previewImage && placeholder && removeTrigger) {
+            logoTrigger.addEventListener("click", function () {
                 logoInput.click();
-            }
-        });
+            });
 
-        logoInput.addEventListener("change", function () {
-            var file = logoInput.files && logoInput.files[0];
-            if (!file) {
+            logoCard.addEventListener("keydown", function (event) {
+                if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    logoInput.click();
+                }
+            });
+
+            logoInput.addEventListener("change", function () {
+                var file = logoInput.files && logoInput.files[0];
+                if (!file) {
+                    return;
+                }
+                if (file.size > maxLogoBytes || !isSupportedLogo(file)) {
+                    logoInput.value = "";
+                    showLogoAlert();
+                    return;
+                }
+                hideLogoAlert();
+                if (temporaryLogoUrl) {
+                    URL.revokeObjectURL(temporaryLogoUrl);
+                }
+                temporaryLogoUrl = URL.createObjectURL(file);
+                previewImage.src = temporaryLogoUrl;
+                previewImage.classList.remove("d-none");
+                placeholder.classList.add("d-none");
+                removeTrigger.disabled = false;
+                logoRemovedForPreview = false;
+            });
+        }
+
+        if (removeSubmit) {
+            removeSubmit.addEventListener("click", function () {
+                logoRemovedForPreview = true;
+                if (previewImage) {
+                    previewImage.classList.add("d-none");
+                }
+                if (previewLogo) {
+                    previewLogo.classList.add("d-none");
+                }
+            });
+        }
+
+        previewButton.addEventListener("click", function () {
+            if (!updateInvoicePreview()) {
                 return;
             }
-
-            if (file.size > maxLogoBytes || !isSupportedLogo(file)) {
-                logoInput.value = "";
-                showLogoAlert();
-                return;
-            }
-
-            hideLogoAlert();
-            previewImage.src = URL.createObjectURL(file);
-            previewImage.classList.remove("d-none");
-            placeholder.classList.add("d-none");
-            removeTrigger.disabled = false;
+            bootstrap.Modal.getOrCreateInstance(previewModalElement).show();
         });
     })();
 </script>
