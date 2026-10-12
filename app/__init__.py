@@ -30,6 +30,7 @@ def create_app(config_class=Config):
 
     Path(app.instance_path).mkdir(parents=True, exist_ok=True)
     app.config["EXPORT_DIR"].mkdir(parents=True, exist_ok=True)
+    app.config["BACKUP_DIR"].mkdir(parents=True, exist_ok=True)
 
     db.init_app(app)
 
@@ -40,6 +41,7 @@ def create_app(config_class=Config):
     from .routes.customers import customers_bp
     from .routes.reports import reports_bp
     from .routes.settings import settings_bp
+    from .routes.data_backup import data_backup_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
@@ -48,6 +50,7 @@ def create_app(config_class=Config):
     app.register_blueprint(customers_bp)
     app.register_blueprint(reports_bp)
     app.register_blueprint(settings_bp)
+    app.register_blueprint(data_backup_bp)
 
     with app.app_context():
         db.create_all()

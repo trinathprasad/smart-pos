@@ -14,3 +14,4 @@ class Config:
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     EXPORT_DIR = BASE_DIR / "exports"
+    BACKUP_DIR = BASE_DIR / "instance" / "backups"

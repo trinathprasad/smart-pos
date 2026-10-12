@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Data &amp; Backup | Smart Store Billing{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap gap-3 justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1">Data &amp; Backup</h1>
+        <p class="text-muted mb-0">Manage local copies of your billing database.</p>
+    </div>
+    <form method="post" action="{{ url_for('data_backup.create') }}">
+        <button class="btn btn-primary d-inline-flex align-items-center" type="submit">
+            <i class="bi bi-database-add me-2" aria-hidden="true"></i>Create Backup
+        </button>
+    </form>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-12 col-xl-7">
+        <section class="card h-100">
+            <div class="card-header"><h2 class="h5 mb-0">Database Overview</h2></div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Status</dt>
+                    <dd class="col-sm-8"><span class="badge text-bg-{{ database_status_class }}">{{ database_status }}</span></dd>
+                    <dt class="col-sm-4">Database location</dt>
+                    <dd class="col-sm-8 text-break">{{ database_path or "Unavailable" }}</dd>
+                    <dt class="col-sm-4">Database file size</dt>
+                    <dd class="col-sm-8">{{ "%.2f KB"|format(database_size / 1024) if database_size is not none else "Unavailable" }}</dd>
+                    <dt class="col-sm-4">Backup directory</dt>
+                    <dd class="col-sm-8 text-break">{{ backup_dir }}</dd>
+                </dl>
+            </div>
+        </section>
+    </div>
+    <div class="col-12 col-xl-5">
+        <section class="card h-100">
+            <div class="card-header"><h2 class="h5 mb-0">Restore Backup</h2></div>
+            <div class="card-body">
+                <p class="mb-3">Restoring replaces current products, customers, bills, and settings with the selected backup.</p>
+                <div class="alert alert-warning mb-0" role="alert">
+                    A safety backup is created automatically before restoration. Only validated Smart Store Billing backups can be restored.
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<section class="card">
+    <div class="card-header d-flex flex-wrap gap-2 justify-content-between align-items-center">
+        <h2 class="h5 mb-0">Backup History</h2>
+        <small class="text-muted">{{ backup_dir }}</small>
+    </div>
+    <div class="card-body p-0">
+        {% if backups %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead><tr><th>Filename</th><th>Created</th><th>File size</th><th>Status</th><th class="text-end">Action</th></tr></thead>
+                <tbody>
+                {% for backup in backups %}
+                <tr>
+                    <td class="text-break">{{ backup.filename }}</td>
+                    <td>{{ backup.created_at.strftime('%d %b %Y, %I:%M %p UTC') if backup.created_at else 'Unavailable' }}</td>
+                    <td>{{ "%.2f KB"|format(backup.size / 1024) if backup.size is not none else "Unavailable" }}</td>
+                    <td><span class="badge text-bg-{{ 'success' if backup.valid else 'danger' }}">{{ 'Valid' if backup.valid else 'Invalid' }}</span></td>
+                    <td class="text-end">
+                        {% if backup.valid %}
+                        <form method="post" action="{{ url_for('data_backup.restore') }}" onsubmit="return confirm('Restore this backup? Current application data will be replaced. A safety backup will be created first.');">
+                            <input type="hidden" name="filename" value="{{ backup.filename }}">
+                            <input type="hidden" name="confirm" value="1">
+                            <button class="btn btn-sm btn-outline-danger" type="submit"><i class="bi bi-arrow-counterclockwise me-1" aria-hidden="true"></i>Restore</button>
+                        </form>
+                        {% else %}<span class="text-muted">Not restorable</span>{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="p-4 text-center text-muted">No local backups are available yet.</div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
