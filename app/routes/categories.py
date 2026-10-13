@@ -1,4 +1,4 @@
-﻿from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import Blueprint, flash, redirect, render_template, request, url_for
 from sqlalchemy.exc import IntegrityError
 
 from ..extensions import db
@@ -30,8 +30,8 @@ def index():
         category_query = category_query.filter(Category.name.ilike(f"%{query}%"))
     categories = category_query.order_by(Category.name.asc()).all()
     product_counts = dict(
-        db.session.query(Product.category_id, db.func.count(Product.id))
-        .filter(Product.category_id.isnot(None))
+        db.session.query(Product.category_id, db.func.count(db.distinct(Product.id)))
+        .filter(Product.category_id.isnot(None), Product.is_active.is_(True))
         .group_by(Product.category_id)
         .all()
     )
@@ -104,14 +104,22 @@ def edit(category_id):
 @categories_bp.route("/<int:category_id>/delete", methods=["POST"])
 def delete(category_id):
     category = Category.query.get_or_404(category_id)
-    assigned_count = Product.query.filter_by(category_id=category.id).count()
-    if assigned_count:
+    active_assigned_count = Product.query.filter_by(category_id=category.id, is_active=True).count()
+    if active_assigned_count:
         flash(
-            f'Cannot delete "{category.name}" because {assigned_count} product(s) are assigned to it. '
+            f'Cannot delete "{category.name}" because {active_assigned_count} active product(s) are assigned to it. '
             "Reassign those products first.",
             "danger",
         )
         return redirect(url_for("categories.index"))
+
+    # Archived products are excluded from active category management. Clear only
+    # their managed FK before deleting the category; retain the legacy text value
+    # and the archived product records for backward compatibility and history.
+    db.session.query(Product).filter(
+        Product.category_id == category.id,
+        Product.is_active.is_(False),
+    ).update({Product.category_id: None}, synchronize_session=False)
     db.session.delete(category)
     db.session.commit()
     flash("Category deleted.", "info")
