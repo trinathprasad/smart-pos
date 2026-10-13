@@ -39,7 +39,13 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label" for="productCategory">Category</label>
-                            <input id="productCategory" type="text" name="category" class="form-control" value="{{ product.category if product else '' }}">
+                            {% set current_category_id = selected_category_id if selected_category_id is not none else (product.category_id if product else none) %}
+                            <select id="productCategory" name="category_id" class="form-select">
+                                <option value="">No category</option>
+                                {% for category in categories %}
+                                    <option value="{{ category.id }}" {% if current_category_id == category.id %}selected{% endif %}>{{ category.name }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                     </div>
                 </div>

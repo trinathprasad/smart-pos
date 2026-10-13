@@ -7,7 +7,7 @@ from sqlalchemy import or_
 from sqlalchemy.exc import IntegrityError
 
 from ..extensions import db
-from ..models import Product, SaleItem
+from ..models import Category, Product, SaleItem
 from ..utils import format_indian_number, to_decimal
 
 
@@ -43,6 +43,33 @@ def _barcode_exists(barcode: str | None, product_id: int | None = None) -> bool:
     return db.session.query(query.exists()).scalar()
 
 
+def _active_categories():
+    return Category.query.order_by(Category.name.asc()).all()
+
+
+def _render_product_form(product=None, selected_category_id=None):
+    return render_template(
+        "products/form.html",
+        product=product,
+        categories=_active_categories(),
+        selected_category_id=selected_category_id,
+    )
+
+
+def _category_from_form():
+    raw_category_id = request.form.get("category_id", "").strip()
+    if not raw_category_id:
+        return None, None
+    try:
+        category_id = int(raw_category_id)
+    except ValueError:
+        return None, "Choose a valid category."
+    category = db.session.get(Category, category_id)
+    if category is None:
+        return None, "Choose a valid category."
+    return category, None
+
+
 def _required_price(field_name: str, required_message: str):
     raw_value = request.form.get(field_name)
     if raw_value is None or raw_value.strip() == "":
@@ -56,6 +83,15 @@ def index():
     sku_filter = request.args.get("sku", "").strip()
     name_filter = request.args.get("name", "").strip()
     category_filter = request.args.get("category", "").strip()
+    selected_category = None
+    if category_filter:
+        if category_filter.isdigit():
+            selected_category = db.session.get(Category, int(category_filter))
+        if selected_category is None:
+            normalized_filter = category_filter.casefold()
+            selected_category = Category.query.filter_by(normalized_name=normalized_filter).first()
+        if selected_category:
+            category_filter = selected_category.name
     stock_filter = request.args.get("filter", "").strip().lower()
     sort = request.args.get("sort", "name").strip().lower()
     direction = request.args.get("direction", "asc").strip().lower()
@@ -65,7 +101,7 @@ def index():
     sort_columns = {
         "sku": Product.sku,
         "name": Product.name,
-        "category": Product.category,
+        "category": Category.name,
         "stock": Product.stock_qty,
         "purchase_price": Product.purchase_price,
         "selling_price": Product.selling_price,
@@ -75,10 +111,10 @@ def index():
     if direction not in {"asc", "desc"}:
         direction = "asc"
 
-    product_query = Product.query.filter_by(is_active=True)
+    product_query = Product.query.outerjoin(Category, Product.category_id == Category.id).filter(Product.is_active.is_(True))
     if query:
         like = f"%{query}%"
-        search_columns = [Product.name, Product.sku, Product.category]
+        search_columns = [Product.name, Product.sku, Product.category, Category.name]
         barcode_column = getattr(Product, "barcode", None)
         if barcode_column is not None:
             search_columns.append(barcode_column)
@@ -87,7 +123,9 @@ def index():
         product_query = product_query.filter(Product.sku.ilike(f"%{sku_filter}%"))
     if name_filter:
         product_query = product_query.filter(Product.name.ilike(f"%{name_filter}%"))
-    if category_filter:
+    if selected_category:
+        product_query = product_query.filter(Product.category_id == selected_category.id)
+    elif category_filter:
         product_query = product_query.filter(Product.category == category_filter)
     if stock_filter == "healthy":
         product_query = product_query.filter(Product.stock_qty > 0, Product.stock_qty > Product.low_stock_threshold)
@@ -101,14 +139,7 @@ def index():
     product_query = product_query.order_by(order_expression, Product.name.asc())
 
     products = product_query.all()
-    categories = [
-        row[0]
-        for row in Product.query.with_entities(Product.category)
-        .filter(Product.is_active.is_(True), Product.category.isnot(None), Product.category != "")
-        .distinct()
-        .order_by(Product.category.asc())
-        .all()
-    ]
+    categories = Category.query.join(Product, Product.category_id == Category.id).filter(Product.is_active.is_(True)).distinct().order_by(Category.name.asc()).all()
     return render_template(
         "products/index.html",
         products=products,
@@ -137,7 +168,7 @@ def export():
             [
                 product.sku,
                 product.name,
-                product.category or "",
+                (product.category_record.name if product.category_record else product.category) or "",
                 product.unit,
                 product.purchase_price,
                 product.selling_price,
@@ -155,40 +186,45 @@ def export():
 @products_bp.route("/new", methods=["GET", "POST"])
 def create():
     if request.method == "POST":
+        category, category_error = _category_from_form()
+        if category_error:
+            flash(category_error, "danger")
+            return _render_product_form(None, request.form.get("category_id", type=int))
         sku = request.form.get("sku", "").strip()
         name = request.form.get("name", "").strip()
         barcode = _clean_barcode(request.form.get("barcode"))
         if not sku or not name:
             flash("SKU and product name are required.", "danger")
-            return render_template("products/form.html", product=None)
+            return _render_product_form(None, request.form.get("category_id", type=int))
         if _barcode_exists(barcode):
             flash("Barcode already exists for another product.", "danger")
-            return render_template("products/form.html", product=None)
+            return _render_product_form(None, request.form.get("category_id", type=int))
         purchase_price, price_error = _required_price("purchase_price", "Purchase price is required.")
         if price_error:
             flash(price_error, "danger")
-            return render_template("products/form.html", product=None)
+            return _render_product_form(None, request.form.get("category_id", type=int))
         selling_price, price_error = _required_price("selling_price", "Selling price is required.")
         if price_error:
             flash(price_error, "danger")
-            return render_template("products/form.html", product=None)
+            return _render_product_form(None, request.form.get("category_id", type=int))
         stock_qty = to_decimal(request.form.get("stock_qty"))
         low_stock_threshold = to_decimal(request.form.get("low_stock_threshold"))
         if purchase_price < 0:
             flash("Purchase price cannot be negative.", "danger")
-            return render_template("products/form.html", product=None)
+            return _render_product_form(None, request.form.get("category_id", type=int))
         if selling_price < 0:
             flash("Selling price cannot be negative.", "danger")
-            return render_template("products/form.html", product=None)
+            return _render_product_form(None, request.form.get("category_id", type=int))
         if stock_qty < 0 or low_stock_threshold < 0:
             flash("Stock and low stock values cannot be negative.", "danger")
-            return render_template("products/form.html", product=None)
+            return _render_product_form(None, request.form.get("category_id", type=int))
 
         product = Product(
             sku=sku,
             barcode=barcode,
             name=name,
-            category=request.form.get("category", "").strip() or None,
+            category=category.name if category else None,
+            category_record=category,
             brand=request.form.get("brand", "").strip() or None,
             unit=request.form.get("unit", "pcs").strip() or "pcs",
             description=request.form.get("description", "").strip() or None,
@@ -209,43 +245,48 @@ def create():
                 flash("SKU must be unique. This code already exists.", "danger")
             else:
                 flash(f"Could not save product: {exc.orig}", "danger")
-            return render_template("products/form.html", product=None)
+            return _render_product_form(None, request.form.get("category_id", type=int))
         flash("Product added successfully.", "success")
         return redirect(url_for("products.index"))
-    return render_template("products/form.html", product=None)
+    return _render_product_form(None, request.form.get("category_id", type=int))
 
 
 @products_bp.route("/<int:product_id>/edit", methods=["GET", "POST"])
 def edit(product_id):
     product = Product.query.get_or_404(product_id)
     if request.method == "POST":
+        category, category_error = _category_from_form()
+        if category_error:
+            flash(category_error, "danger")
+            return _render_product_form(product, request.form.get("category_id", type=int))
         barcode = _clean_barcode(request.form.get("barcode"))
         if _barcode_exists(barcode, product.id):
             flash("Barcode already exists for another product.", "danger")
-            return render_template("products/form.html", product=product)
+            return _render_product_form(product, request.form.get("category_id", type=int))
         purchase_price, price_error = _required_price("purchase_price", "Purchase price is required.")
         if price_error:
             flash(price_error, "danger")
-            return render_template("products/form.html", product=product)
+            return _render_product_form(product, request.form.get("category_id", type=int))
         selling_price, price_error = _required_price("selling_price", "Selling price is required.")
         if price_error:
             flash(price_error, "danger")
-            return render_template("products/form.html", product=product)
+            return _render_product_form(product, request.form.get("category_id", type=int))
         stock_qty = to_decimal(request.form.get("stock_qty"))
         low_stock_threshold = to_decimal(request.form.get("low_stock_threshold"))
         if purchase_price < 0:
             flash("Purchase price cannot be negative.", "danger")
-            return render_template("products/form.html", product=product)
+            return _render_product_form(product, request.form.get("category_id", type=int))
         if selling_price < 0:
             flash("Selling price cannot be negative.", "danger")
-            return render_template("products/form.html", product=product)
+            return _render_product_form(product, request.form.get("category_id", type=int))
         if stock_qty < 0 or low_stock_threshold < 0:
             flash("Stock and low stock values cannot be negative.", "danger")
-            return render_template("products/form.html", product=product)
+            return _render_product_form(product, request.form.get("category_id", type=int))
         product.sku = request.form.get("sku", "").strip()
         product.barcode = barcode
         product.name = request.form.get("name", "").strip()
-        product.category = request.form.get("category", "").strip() or None
+        product.category_record = category
+        product.category = category.name if category else None
         product.brand = request.form.get("brand", "").strip() or None
         product.unit = request.form.get("unit", "pcs").strip() or "pcs"
         product.description = request.form.get("description", "").strip() or None
@@ -264,10 +305,10 @@ def edit(product_id):
                 flash("SKU must be unique. This code already exists.", "danger")
             else:
                 flash(f"Could not update product: {exc.orig}", "danger")
-            return render_template("products/form.html", product=product)
+            return _render_product_form(product, request.form.get("category_id", type=int))
         flash("Product updated successfully.", "success")
         return redirect(url_for("products.index"))
-    return render_template("products/form.html", product=product)
+    return _render_product_form(product, request.form.get("category_id", type=int))
 
 
 @products_bp.route("/<int:product_id>/delete", methods=["POST"])

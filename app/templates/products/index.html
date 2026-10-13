@@ -97,7 +97,7 @@
                 <select id="productCategoryFilter" class="form-select" name="category" data-bs-toggle="tooltip" title="Filter by category">
                     <option value="">All Categories</option>
                     {% for category in categories %}
-                        <option value="{{ category }}" {% if category_filter == category %}selected{% endif %}>{{ category }}</option>
+                        <option value="{{ category.id }}" {% if category_filter == category.name %}selected{% endif %}>{{ category.name }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -208,10 +208,10 @@
                     <tr class="{% if product.is_low_stock() %}product-row-low-stock{% endif %}">
                         <td>{{ product.sku }}</td>
                         <td>{{ product.name }}</td>
-                        <td>{{ product.category or "-" }}</td>
+                        <td>{{ product.category_record.name if product.category_record else (product.category or "-") }}</td>
                         <td>{{ product.unit }}</td>
                         <td>&#8377;{{ "%.2f"|format(product.purchase_price) }}</td>
-                        <td>₹{{ "%.2f"|format(product.selling_price) }}</td>
+                        <td>&#8377;{{ "%.2f"|format(product.selling_price) }}</td>
                         <td>
                             {% set profit = product.selling_price - product.purchase_price %}
                             {% if profit > 0 %}

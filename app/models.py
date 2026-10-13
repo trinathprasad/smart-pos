@@ -7,12 +7,23 @@ from sqlalchemy import Numeric
 from .extensions import db
 
 
+class Category(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80), nullable=False)
+    normalized_name = db.Column(db.String(80), nullable=False, unique=True, index=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+
+    products = db.relationship('Product', back_populates='category_record')
+
+
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     sku = db.Column(db.String(50), unique=True, nullable=False, index=True)
     barcode = db.Column(db.String(80), unique=True, nullable=True, index=True)
     name = db.Column(db.String(120), nullable=False, index=True)
     category = db.Column(db.String(80), nullable=True, index=True)
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=True, index=True)
     brand = db.Column(db.String(120), nullable=True)
     unit = db.Column(db.String(20), nullable=False, default="pcs")
     description = db.Column(db.Text, nullable=True)
@@ -33,7 +44,8 @@ class Product(db.Model):
         onupdate=lambda: datetime.now(timezone.utc),
     )
 
-    sale_items = db.relationship("SaleItem", back_populates="product")
+    sale_items = db.relationship('SaleItem', back_populates='product')
+    category_record = db.relationship('Category', back_populates='products')
 
     @classmethod
     def active_query(cls):

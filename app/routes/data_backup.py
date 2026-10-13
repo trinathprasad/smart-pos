@@ -10,6 +10,7 @@ from flask import Blueprint, current_app, flash, redirect, render_template, requ
 from sqlalchemy.engine import make_url
 
 from ..extensions import db
+from ..schema import upgrade_category_schema
 
 
 data_backup_bp = Blueprint("data_backup", __name__, url_prefix="/data-backup")
@@ -256,6 +257,8 @@ def restore():
                 "Database restore failed, and the original database was recovered "
                 "from the safety backup."
             ) from restore_error
+
+        upgrade_category_schema()
 
         valid, reason = _validate_database(database_path)
         if not valid:

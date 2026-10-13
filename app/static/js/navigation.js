@@ -190,7 +190,15 @@ function activateTopNavItem(item) {
     localStorage.removeItem(activeSidebarKey);
 }
 
-if (localStorage.getItem(activeNavigationKey) === "header") {
+const serverActiveSidebarItem = document.querySelector("[data-sidebar-item].active");
+
+if (serverActiveSidebarItem) {
+    clearHeaderNavItems();
+    clearTopNavItems();
+    setActiveSidebarItem(serverActiveSidebarItem);
+    localStorage.setItem(activeNavigationKey, "sidebar");
+    localStorage.setItem(activeSidebarKey, serverActiveSidebarItem.dataset.sidebarItem);
+} else if (localStorage.getItem(activeNavigationKey) === "header") {
     const activeHeaderItem = document.querySelector("[data-header-nav-item].active") || headerNavItems[0];
     clearTopNavItems();
     clearSidebarItems();
@@ -226,6 +234,9 @@ topNavItems.forEach((item) => {
 sidebarItems.forEach((item) => {
     item.setAttribute("aria-pressed", String(item.classList.contains("active")));
     item.addEventListener("click", () => activateSidebarItem(item));
+    if (item.tagName === "A") {
+        attachPageLoader(item);
+    }
     item.addEventListener("keydown", (event) => {
         if (event.key === "Enter" || event.key === " ") {
             event.preventDefault();

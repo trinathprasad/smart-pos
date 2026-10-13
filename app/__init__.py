@@ -7,6 +7,7 @@ from .config import Config
 from .dashboard_metrics import dashboard_kpi_comparisons
 from .extensions import db
 from .utils import format_bill_datetime, format_quantity, format_quantity_with_unit
+from .schema import upgrade_category_schema
 
 
 def create_app(config_class=Config):
@@ -37,6 +38,7 @@ def create_app(config_class=Config):
     from .routes.auth import auth_bp
     from .routes.main import main_bp
     from .routes.products import products_bp
+    from .routes.categories import categories_bp
     from .routes.billing import billing_bp
     from .routes.customers import customers_bp
     from .routes.reports import reports_bp
@@ -46,6 +48,7 @@ def create_app(config_class=Config):
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
     app.register_blueprint(products_bp)
+    app.register_blueprint(categories_bp)
     app.register_blueprint(billing_bp)
     app.register_blueprint(customers_bp)
     app.register_blueprint(reports_bp)
@@ -102,5 +105,6 @@ def create_app(config_class=Config):
             text("UPDATE sale SET paid_amount = grand_total WHERE payment_status = 'Paid' AND paid_amount = 0")
         )
         db.session.commit()
+        upgrade_category_schema()
 
     return app

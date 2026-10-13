@@ -1,0 +1,26 @@
+﻿{% extends "base.html" %}
+{% block title %}{{ "Edit Category" if category else "Add Category" }} | Smart Store Billing{% endblock %}
+{% block body_class %}page-categories{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-1">{{ "Edit Category" if category else "Add Category" }}</h1>
+        <p class="text-muted mb-0">Use a unique name for product organization.</p>
+    </div>
+    <a href="{{ url_for('categories.index') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-2"></i>Back to Categories</a>
+</div>
+<section class="card category-form-shell">
+    <div class="card-header"><h2 class="h5 mb-0"><i class="bi bi-tags me-2"></i>Category Details</h2></div>
+    <div class="card-body p-4">
+        <form method="post">
+            <label class="form-label" for="categoryName">Category Name</label>
+            <input id="categoryName" name="name" type="text" class="form-control" value="{{ category.name if category else '' }}" maxlength="80" required autofocus>
+            <div class="form-text">Names are matched without regard to letter case or surrounding spaces.</div>
+            <div class="d-flex flex-wrap gap-2 mt-4">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-check2 me-2"></i>{{ "Save Changes" if category else "Add Category" }}</button>
+                <a href="{{ url_for('categories.index') }}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}
