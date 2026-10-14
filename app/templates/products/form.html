@@ -15,6 +15,9 @@
     </div>
 
     <form method="post" class="product-form" data-profit-preview-form>
+        {% if return_to %}
+            <input type="hidden" name="return_to" value="{{ return_to }}">
+        {% endif %}
         <div class="product-form-grid">
             <section class="card product-form-section">
                 <div class="card-header product-form-section-header">

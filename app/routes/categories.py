@@ -1,4 +1,5 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
+from sqlalchemy import or_
 from sqlalchemy.exc import IntegrityError
 
 from ..extensions import db
@@ -43,6 +44,31 @@ def index():
         total_categories=Category.query.count(),
         total_assigned=total_assigned,
         query=query,
+    )
+
+
+@categories_bp.route("/<int:category_id>/products")
+def category_products(category_id):
+    category = Category.query.get_or_404(category_id)
+    query = request.args.get("q", "").strip()
+    category_products_query = Product.query.filter(
+        Product.category_id == category.id,
+        Product.is_active.is_(True),
+    )
+    total_products = category_products_query.count()
+    product_query = category_products_query
+    if query:
+        like = f"%{query}%"
+        product_query = product_query.filter(
+            or_(Product.name.ilike(like), Product.sku.ilike(like))
+        )
+    products = product_query.order_by(Product.name.asc(), Product.sku.asc()).all()
+    return render_template(
+        "categories/products.html",
+        category=category,
+        products=products,
+        query=query,
+        total_products=total_products,
     )
 
 

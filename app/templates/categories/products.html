@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}{{ category.name }} Products | Smart Store Billing{% endblock %}
+{% block body_class %}page-categories page-category-products{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-1">{{ category.name }} Products</h1>
+        <p class="text-muted mb-0">{{ total_products }} active product{{ "s" if total_products != 1 else "" }} assigned to this category.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('categories.index') }}" class="btn btn-outline-secondary d-inline-flex align-items-center">
+            <i class="bi bi-arrow-left me-2"></i>
+            Back to Categories
+        </a>
+        <a href="{{ url_for('products.create', category_id=category.id, return_to=url_for('categories.category_products', category_id=category.id)) }}" class="btn btn-primary d-inline-flex align-items-center">
+            <i class="bi bi-plus-circle me-2"></i>
+            Add Product
+        </a>
+    </div>
+</div>
+
+<section class="card mb-4">
+    <div class="card-body">
+        <form class="product-filter-form" method="get">
+            <div class="product-filter-main">
+                <label class="form-label" for="categoryProductSearch"><i class="bi bi-search me-1"></i>Search Products</label>
+                <div class="product-search-control">
+                    <i class="bi bi-search product-search-icon"></i>
+                    <input id="categoryProductSearch" type="search" class="form-control" name="q" value="{{ query }}" placeholder="Product name or SKU" autocomplete="off">
+                </div>
+            </div>
+            <div class="product-filter-actions">
+                <a href="{{ url_for('categories.category_products', category_id=category.id) }}" class="btn btn-outline-secondary">Reset</a>
+                <button class="btn btn-primary" type="submit"><i class="bi bi-funnel me-2"></i>Search</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<section class="card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>SKU</th>
+                    <th>Product Name</th>
+                    <th>Unit</th>
+                    <th>Purchase Price</th>
+                    <th>Selling Price</th>
+                    <th>Stock Quantity</th>
+                    <th>Stock Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for product in products %}
+                <tr class="{% if product.is_low_stock() %}product-row-low-stock{% endif %}">
+                    <td>{{ product.sku }}</td>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.unit }}</td>
+                    <td>&#8377;{{ "%.2f"|format(product.purchase_price) }}</td>
+                    <td>&#8377;{{ "%.2f"|format(product.selling_price) }}</td>
+                    <td>{{ product.stock_qty|quantity }} {{ product.unit }}</td>
+                    <td>
+                        {% if product.is_out_of_stock() %}
+                            <span class="badge text-bg-danger">Out of Stock</span>
+                        {% elif product.is_low_stock() %}
+                            <span class="badge badge-low-stock">Low Stock</span>
+                        {% else %}
+                            <span class="badge text-bg-success">Healthy</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                        <a href="{{ url_for('products.edit', product_id=product.id) }}" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-pencil me-1"></i>Edit
+                        </a>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="8" class="text-center py-5 text-muted">
+                        {% if query %}
+                            No active products in {{ category.name }} match "{{ query }}".
+                        {% else %}
+                            No active products are assigned to {{ category.name }} yet.
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

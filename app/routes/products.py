@@ -47,12 +47,20 @@ def _active_categories():
     return Category.query.order_by(Category.name.asc()).all()
 
 
+def _safe_return_path():
+    return_to = request.values.get("return_to", "").strip()
+    if return_to.startswith("/") and not return_to.startswith("//"):
+        return return_to
+    return None
+
+
 def _render_product_form(product=None, selected_category_id=None):
     return render_template(
         "products/form.html",
         product=product,
         categories=_active_categories(),
         selected_category_id=selected_category_id,
+        return_to=_safe_return_path(),
     )
 
 
@@ -247,8 +255,9 @@ def create():
                 flash(f"Could not save product: {exc.orig}", "danger")
             return _render_product_form(None, request.form.get("category_id", type=int))
         flash("Product added successfully.", "success")
-        return redirect(url_for("products.index"))
-    return _render_product_form(None, request.form.get("category_id", type=int))
+        return redirect(_safe_return_path() or url_for("products.index"))
+    selected_category_id = request.args.get("category_id", type=int)
+    return _render_product_form(None, selected_category_id)
 
 
 @products_bp.route("/<int:product_id>/edit", methods=["GET", "POST"])
