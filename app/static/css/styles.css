@@ -1309,6 +1309,37 @@ body.is-sidebar-collapsed .app-sidebar-link .bi {
     background-color: var(--brand-table-hover);
 }
 
+.category-image-cell {
+    width: 84px;
+    padding: 0.5rem 0.75rem;
+    vertical-align: middle;
+}
+
+.category-thumbnail {
+    display: inline-flex;
+    width: 64px;
+    height: 64px;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 1px solid var(--brand-border);
+    border-radius: 8px;
+    background-color: var(--brand-header);
+    vertical-align: middle;
+}
+
+.category-thumbnail img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.category-image-placeholder {
+    color: var(--brand-muted);
+}
+
+
 #bill-items .qty-input {
     min-width: 90px;
 }

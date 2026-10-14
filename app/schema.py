@@ -17,6 +17,10 @@ def upgrade_category_schema() -> None:
     """
     db.create_all()
     inspector = inspect(db.engine)
+    category_columns = {column["name"] for column in inspector.get_columns("category")}
+    if "image_path" not in category_columns:
+        db.session.execute(text("ALTER TABLE category ADD COLUMN image_path VARCHAR(255)"))
+
     product_columns = {column["name"] for column in inspector.get_columns("product")}
 
     if "category_id" not in product_columns:

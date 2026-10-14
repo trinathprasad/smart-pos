@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 {% block title %}{{ "Edit Category" if category else "Add Category" }} | Smart Store Billing{% endblock %}
 {% block body_class %}page-categories{% endblock %}
 {% block content %}
@@ -12,10 +12,34 @@
 <section class="card category-form-shell">
     <div class="card-header"><h2 class="h5 mb-0"><i class="bi bi-tags me-2"></i>Category Details</h2></div>
     <div class="card-body p-4">
-        <form method="post">
-            <label class="form-label" for="categoryName">Category Name</label>
-            <input id="categoryName" name="name" type="text" class="form-control" value="{{ category.name if category else '' }}" maxlength="80" required autofocus>
-            <div class="form-text">Names are matched without regard to letter case or surrounding spaces.</div>
+        <form method="post" enctype="multipart/form-data" id="categoryForm">
+            <div class="mb-3">
+                <label class="form-label" for="categoryName">Category Name</label>
+                <input id="categoryName" name="name" type="text" class="form-control" value="{{ category.name if category else '' }}" maxlength="80" required autofocus>
+                <div class="form-text">Names are matched without regard to letter case or surrounding spaces.</div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" for="categoryImage">Category Image <span class="text-muted fw-normal">(Optional)</span></label>
+                <div class="alert alert-danger d-none" id="categoryImageAlert" role="alert"></div>
+                <input id="categoryImage" name="image" type="file" class="form-control" accept=".png,.jpg,.jpeg,image/png,image/jpeg">
+                <div class="form-text">PNG, JPG, or JPEG. Maximum size: 2 MB.</div>
+                <div class="mt-3" id="categoryImagePreviewContainer">
+                    {% if category and category.image_path and category.image_path.startswith('uploads/category_images/') %}
+                        <img id="categoryImagePreview" src="{{ url_for('static', filename=category.image_path) }}" alt="Current {{ category.name }} category image" class="img-thumbnail" style="max-width: 180px; max-height: 120px; object-fit: cover;">
+                    {% else %}
+                        <img id="categoryImagePreview" src="" alt="Category image preview" class="img-thumbnail d-none" style="max-width: 180px; max-height: 120px; object-fit: cover;">
+                    {% endif %}
+                </div>
+                {% if category and category.image_path and category.image_path.startswith('uploads/category_images/') %}
+                    <div class="form-check mt-2">
+                        <input type="hidden" name="remove_image" id="removeCategoryImageValue" value="0">
+                        <input class="form-check-input" type="checkbox" id="removeCategoryImage">
+                        <label class="form-check-label" for="removeCategoryImage">Remove current image</label>
+                    </div>
+                {% endif %}
+            </div>
+
             <div class="d-flex flex-wrap gap-2 mt-4">
                 <button type="submit" class="btn btn-primary"><i class="bi bi-check2 me-2"></i>{{ "Save Changes" if category else "Add Category" }}</button>
                 <a href="{{ url_for('categories.index') }}" class="btn btn-outline-secondary">Cancel</a>
@@ -23,4 +47,76 @@
         </form>
     </div>
 </section>
+{% endblock %}
+{% block scripts %}
+    {{ super() }}
+    <script>
+        (function () {
+            var input = document.getElementById("categoryImage");
+            var preview = document.getElementById("categoryImagePreview");
+            var alertBox = document.getElementById("categoryImageAlert");
+            var removeCheckbox = document.getElementById("removeCategoryImage");
+            var removeValue = document.getElementById("removeCategoryImageValue");
+            var objectUrl = null;
+            var maxBytes = 2097152;
+            var allowedExtensions = ["png", "jpg", "jpeg"];
+            var allowedTypes = ["image/png", "image/jpeg"];
+
+            if (!input || !preview || !alertBox) {
+                return;
+            }
+
+            function showError(message) {
+                alertBox.textContent = message;
+                alertBox.classList.remove("d-none");
+            }
+
+            function clearError() {
+                alertBox.textContent = "";
+                alertBox.classList.add("d-none");
+            }
+
+            input.addEventListener("change", function () {
+                var file = input.files && input.files[0];
+                if (!file) {
+                    return;
+                }
+                var extension = file.name.split(".").pop().toLowerCase();
+                if (file.size > maxBytes) {
+                    input.value = "";
+                    showError("Category image must be 2 MB or smaller.");
+                    return;
+                }
+                if (allowedExtensions.indexOf(extension) === -1 || allowedTypes.indexOf(file.type) === -1) {
+                    input.value = "";
+                    showError("Category image must be a PNG, JPG, or JPEG file.");
+                    return;
+                }
+                clearError();
+                if (objectUrl) {
+                    URL.revokeObjectURL(objectUrl);
+                }
+                objectUrl = URL.createObjectURL(file);
+                preview.src = objectUrl;
+                preview.classList.remove("d-none");
+                if (removeCheckbox) {
+                    removeCheckbox.checked = false;
+                }
+                if (removeValue) {
+                    removeValue.value = "0";
+                }
+            });
+
+            if (removeCheckbox && removeValue) {
+                removeCheckbox.addEventListener("change", function () {
+                    removeValue.value = removeCheckbox.checked ? "1" : "0";
+                    if (removeCheckbox.checked) {
+                        input.value = "";
+                        preview.removeAttribute("src");
+                        preview.classList.add("d-none");
+                    }
+                });
+            }
+        })();
+    </script>
 {% endblock %}

@@ -34,10 +34,21 @@
 <section class="card mt-4">
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
-            <thead><tr><th>Category</th><th>Products Assigned</th><th class="text-end">Actions</th></tr></thead>
+            <thead><tr><th>Image</th><th>Category</th><th>Products Assigned</th><th class="text-end">Actions</th></tr></thead>
             <tbody>
             {% for category in categories %}
                 <tr>
+                    <td class="category-image-cell">
+                        {% if category.image_path and category.image_path.startswith('uploads/category_images/') %}
+                            <span class="category-thumbnail">
+                                <img src="{{ url_for('static', filename=category.image_path) }}" alt="{{ category.name }} category image">
+                            </span>
+                        {% else %}
+                            <span class="category-thumbnail category-image-placeholder" aria-label="No category image">
+                                <i class="bi bi-image" aria-hidden="true"></i>
+                            </span>
+                        {% endif %}
+                    </td>
                     <td>
                         <a href="{{ url_for('categories.category_products', category_id=category.id) }}" class="text-decoration-none fw-semibold">
                             {{ category.name }}
@@ -58,7 +69,7 @@
                     </div></td>
                 </tr>
             {% else %}
-                <tr><td colspan="3" class="text-center py-4 text-muted">No categories found.</td></tr>
+                <tr><td colspan="4" class="text-center py-4 text-muted">No categories found.</td></tr>
             {% endfor %}
             </tbody>
         </table>
