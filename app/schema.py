@@ -10,7 +10,11 @@ def normalize_category_name(value: str | None) -> str:
 
 
 def upgrade_category_schema() -> None:
-    """Create and backfill managed categories without removing legacy data."""
+    """Create and backfill managed categories without removing legacy data.
+
+    Archived products retain their legacy category text for historical display,
+    but must not recreate a managed category that was intentionally deleted.
+    """
     db.create_all()
     inspector = inspect(db.engine)
     product_columns = {column["name"] for column in inspector.get_columns("product")}
@@ -25,7 +29,10 @@ def upgrade_category_schema() -> None:
     categories_by_normalized = {row["normalized_name"]: row["id"] for row in category_rows}
 
     products = db.session.execute(
-        text("SELECT id, category, category_id FROM product WHERE category IS NOT NULL ORDER BY id")
+        text(
+            "SELECT id, category, category_id FROM product "
+            "WHERE category IS NOT NULL AND is_active = 1 ORDER BY id"
+        )
     ).mappings().all()
     for product in products:
         normalized_name = normalize_category_name(product["category"])
