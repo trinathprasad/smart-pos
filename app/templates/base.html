@@ -99,10 +99,10 @@
                         <i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>
                         <span>Categories</span>
                     </a>
-                    <div class="app-sidebar-link" role="button" tabindex="0" data-sidebar-item="quick-actions" title="Quick Actions" data-bs-placement="right">
+                    <a class="app-sidebar-link{% if active_section == 'quick_actions' %} active{% endif %}" href="{{ url_for('quick_actions.index') }}" data-sidebar-item="quick-actions" title="Quick Actions" data-bs-placement="right"{% if active_section == 'quick_actions' %} aria-current="page"{% endif %}>
                         <i class="bi bi-lightning-charge" aria-hidden="true"></i>
                         <span>Quick Actions</span>
-                    </div>
+                    </a>
                     <div class="app-sidebar-link" role="button" tabindex="0" data-sidebar-item="inventory" title="Inventory" data-bs-placement="right">
                         <i class="bi bi-boxes" aria-hidden="true"></i>
                         <span>Inventory</span>

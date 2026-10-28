@@ -39,6 +39,7 @@ def create_app(config_class=Config):
     from .routes.main import main_bp
     from .routes.products import products_bp
     from .routes.categories import categories_bp
+    from .routes.quick_actions import quick_actions_bp
     from .routes.billing import billing_bp
     from .routes.customers import customers_bp
     from .routes.reports import reports_bp
@@ -49,6 +50,7 @@ def create_app(config_class=Config):
     app.register_blueprint(main_bp)
     app.register_blueprint(products_bp)
     app.register_blueprint(categories_bp)
+    app.register_blueprint(quick_actions_bp)
     app.register_blueprint(billing_bp)
     app.register_blueprint(customers_bp)
     app.register_blueprint(reports_bp)

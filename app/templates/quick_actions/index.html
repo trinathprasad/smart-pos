@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Quick Actions | Smart Store Billing{% endblock %}
+{% block body_class %}page-quick-actions{% endblock %}
+{% block content %}
+<div class="quick-actions-header">
+    <div>
+        <h1 class="h3 mb-1">Quick Actions</h1>
+        <p class="text-muted mb-0">Start common billing tasks from one place.</p>
+    </div>
+</div>
+
+<section class="quick-action-grid" aria-label="Quick Actions">
+    <article class="quick-action-card">
+        <div class="quick-action-icon quick-action-icon-product" aria-hidden="true"><i class="bi bi-box-seam"></i></div>
+        <div class="quick-action-card-body">
+            <h2 class="h5">Add Product</h2>
+            <p class="text-muted">Create a product and keep your inventory details up to date.</p>
+            <a href="{{ url_for('products.create') }}" class="btn btn-primary quick-action-button">Add Product</a>
+        </div>
+    </article>
+    <article class="quick-action-card">
+        <div class="quick-action-icon quick-action-icon-customer" aria-hidden="true"><i class="bi bi-person-plus"></i></div>
+        <div class="quick-action-card-body">
+            <h2 class="h5">Add Customer</h2>
+            <p class="text-muted">Save customer contact details for faster billing and balance tracking.</p>
+            <a href="{{ url_for('customers.create') }}" class="btn btn-primary quick-action-button">Add Customer</a>
+        </div>
+    </article>
+    <article class="quick-action-card">
+        <div class="quick-action-icon quick-action-icon-category" aria-hidden="true"><i class="bi bi-tags"></i></div>
+        <div class="quick-action-card-body">
+            <h2 class="h5">Add Category</h2>
+            <p class="text-muted">Organize products with a clear category name and optional image.</p>
+            <a href="{{ url_for('categories.create') }}" class="btn btn-primary quick-action-button">Add Category</a>
+        </div>
+    </article>
+    <article class="quick-action-card">
+        <div class="quick-action-icon quick-action-icon-bill" aria-hidden="true"><i class="bi bi-receipt-cutoff"></i></div>
+        <div class="quick-action-card-body">
+            <h2 class="h5">Create Bill</h2>
+            <p class="text-muted">Build a new sale, record payment details, and complete checkout.</p>
+            <a href="{{ url_for('billing.new_bill') }}" class="btn btn-primary quick-action-button">Create Bill</a>
+        </div>
+    </article>
+</section>
+{% endblock %}
