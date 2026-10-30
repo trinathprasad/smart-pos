@@ -12,6 +12,53 @@
         <a href="{{ return_to or url_for('products.inventory') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-2"></i>Back</a>
     </div>
 </div>
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="product-filter-form" id="stockHistoryFilterForm">
+            {% if return_to %}<input type="hidden" name="return_to" value="{{ return_to }}">{% endif %}
+            <div>
+                <label class="form-label" for="stockHistoryDateRange"><i class="bi bi-calendar3 me-1"></i>Date range</label>
+                <select id="stockHistoryDateRange" name="date_range" class="form-select">
+                    <option value="">All dates</option>
+                    <option value="today" {% if date_range == "today" %}selected{% endif %}>Today</option>
+                    <option value="last_7_days" {% if date_range == "last_7_days" %}selected{% endif %}>Last 7 Days</option>
+                    <option value="last_30_days" {% if date_range == "last_30_days" %}selected{% endif %}>Last 30 Days</option>
+                    <option value="custom" {% if date_range == "custom" %}selected{% endif %}>Custom Date Range</option>
+                </select>
+            </div>
+            <div id="stockHistoryCustomDates" class="d-flex flex-wrap gap-3 {% if date_range != 'custom' %}d-none{% endif %}">
+                <div>
+                    <label class="form-label" for="stockHistoryStartDate">Start date</label>
+                    <input id="stockHistoryStartDate" name="start_date" type="date" class="form-control" value="{{ start_date_value }}" max="{{ today_date }}">
+                </div>
+                <div>
+                    <label class="form-label" for="stockHistoryEndDate">End date</label>
+                    <input id="stockHistoryEndDate" name="end_date" type="date" class="form-control" value="{{ end_date_value }}" max="{{ today_date }}">
+                </div>
+            </div>
+            <div>
+                <label class="form-label" for="stockHistoryType"><i class="bi bi-sliders me-1"></i>Adjustment type</label>
+                <select id="stockHistoryType" name="adjustment_type" class="form-select">
+                    <option value="">All Types</option>
+                    <option value="increase" {% if adjustment_type == "increase" %}selected{% endif %}>Increase</option>
+                    <option value="decrease" {% if adjustment_type == "decrease" %}selected{% endif %}>Decrease</option>
+                    <option value="set" {% if adjustment_type == "set" %}selected{% endif %}>Set Stock</option>
+                </select>
+            </div>
+            <div class="product-filter-main">
+                <label class="form-label" for="stockHistoryReason"><i class="bi bi-search me-1"></i>Reason</label>
+                <div class="product-search-control">
+                    <i class="bi bi-search product-search-icon"></i>
+                    <input id="stockHistoryReason" name="reason" type="search" class="form-control" value="{{ reason_query }}" placeholder="Search reason" autocomplete="off">
+                </div>
+            </div>
+            <div class="product-filter-actions">
+                <a href="{{ url_for('products.stock_history', product_id=product.id, return_to=return_to) }}" class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center"><i class="bi bi-arrow-counterclockwise me-2"></i>Reset</a>
+                <button type="submit" class="btn btn-primary d-inline-flex align-items-center justify-content-center"><i class="bi bi-funnel me-2"></i>Apply Filters</button>
+            </div>
+        </form>
+    </div>
+</div>
 <div class="card">
     <div class="table-responsive">
         <table class="table align-middle mb-0">
@@ -33,4 +80,16 @@
         </table>
     </div>
 </div>
+{% endblock %}
+{% block scripts %}
+<script>
+    const stockHistoryDateRange = document.getElementById("stockHistoryDateRange");
+    const stockHistoryCustomDates = document.getElementById("stockHistoryCustomDates");
+
+    if (stockHistoryDateRange && stockHistoryCustomDates) {
+        stockHistoryDateRange.addEventListener("change", () => {
+            stockHistoryCustomDates.classList.toggle("d-none", stockHistoryDateRange.value !== "custom");
+        });
+    }
+</script>
 {% endblock %}

@@ -1,4 +1,5 @@
 import csv
+from datetime import date, timedelta
 from decimal import Decimal, InvalidOperation
 from io import StringIO
 
@@ -8,7 +9,7 @@ from sqlalchemy.exc import IntegrityError
 
 from ..extensions import db
 from ..models import Category, Product, SaleItem, StockMovement
-from ..utils import format_indian_number, to_decimal
+from ..utils import format_indian_number, local_today, to_decimal, utc_bounds_for_local_date
 
 
 products_bp = Blueprint("products", __name__, url_prefix="/products")
@@ -328,8 +329,76 @@ def adjust_stock(product_id):
 @products_bp.route("/<int:product_id>/stock-history")
 def stock_history(product_id):
     product = Product.query.get_or_404(product_id)
-    movements = StockMovement.query.filter_by(product_id=product.id).order_by(StockMovement.created_at.desc(), StockMovement.id.desc()).all()
-    return render_template("products/stock_history.html", product=product, movements=movements, return_to=_safe_return_path())
+    date_range = request.args.get("date_range", "").strip().lower()
+    adjustment_type = request.args.get("adjustment_type", "").strip().lower()
+    reason_query = request.args.get("reason", "").strip()
+    start_date_value = request.args.get("start_date", "").strip()
+    end_date_value = request.args.get("end_date", "").strip()
+    allowed_date_ranges = {"today", "last_7_days", "last_30_days", "custom"}
+    allowed_adjustment_types = {"increase", "decrease", "set"}
+    if date_range not in allowed_date_ranges:
+        date_range = ""
+    if adjustment_type not in allowed_adjustment_types:
+        adjustment_type = ""
+
+    today = local_today()
+    start_date = None
+    end_date = None
+    filter_errors = []
+    if date_range == "today":
+        start_date = end_date = today
+    elif date_range == "last_7_days":
+        start_date, end_date = today - timedelta(days=6), today
+    elif date_range == "last_30_days":
+        start_date, end_date = today - timedelta(days=29), today
+    elif date_range == "custom":
+        try:
+            start_date = date.fromisoformat(start_date_value) if start_date_value else None
+            end_date = date.fromisoformat(end_date_value) if end_date_value else None
+        except ValueError:
+            filter_errors.append("Enter valid custom start and end dates.")
+        if start_date is None or end_date is None:
+            filter_errors.append("Custom date range requires both a start date and an end date.")
+
+    if start_date and end_date:
+        if start_date > end_date:
+            filter_errors.append("Start date cannot be later than end date.")
+        if start_date > today or end_date > today:
+            filter_errors.append("Future dates cannot be included in stock history.")
+
+    movements = []
+    if not filter_errors:
+        movement_query = StockMovement.query.filter(StockMovement.product_id == product.id)
+        if start_date and end_date:
+            start_datetime, _ = utc_bounds_for_local_date(start_date)
+            _, end_datetime = utc_bounds_for_local_date(end_date)
+            movement_query = movement_query.filter(
+                StockMovement.created_at >= start_datetime,
+                StockMovement.created_at <= end_datetime,
+            )
+        else:
+            _, today_end_datetime = utc_bounds_for_local_date(today)
+            movement_query = movement_query.filter(StockMovement.created_at <= today_end_datetime)
+        if adjustment_type:
+            movement_query = movement_query.filter(StockMovement.adjustment_type == adjustment_type)
+        if reason_query:
+            movement_query = movement_query.filter(StockMovement.reason.ilike(f"%{reason_query}%"))
+        movements = movement_query.order_by(StockMovement.created_at.desc(), StockMovement.id.desc()).all()
+    for error in filter_errors:
+        flash(error, "danger")
+
+    return render_template(
+        "products/stock_history.html",
+        product=product,
+        movements=movements,
+        return_to=_safe_return_path(),
+        date_range=date_range,
+        adjustment_type=adjustment_type,
+        reason_query=reason_query,
+        start_date_value=start_date_value,
+        end_date_value=end_date_value,
+        today_date=today.isoformat(),
+    )
 
 
 @products_bp.route("/export")
