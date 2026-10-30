@@ -280,6 +280,7 @@ body,
 .page-dashboard,
 .page-products,
 .page-inventory,
+.page-help,
 .page-customers,
 .page-billing,
 .page-invoice,
@@ -971,6 +972,7 @@ body.is-sidebar-collapsed .app-sidebar-link .bi {
 
 .page-products .card,
 .page-inventory .card,
+.page-help .card,
 .page-customers .card {
     min-width: 0;
 }

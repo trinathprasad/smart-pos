@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+{% block title %}Help &amp; User Guide | Smart Store Billing{% endblock %}
+{% block body_class %}page-help{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-1">Help &amp; User Guide</h1>
+        <p class="text-muted mb-0">Learn how to manage your shop, products, customers, billing, inventory and reports.</p>
+    </div>
+    <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary d-inline-flex align-items-center">
+        <i class="bi bi-grid me-2" aria-hidden="true"></i>Back to Dashboard
+    </a>
+</div>
+
+<section class="card help-search-card mb-4" aria-labelledby="helpSearchHeading">
+    <div class="card-body">
+        <h2 class="h5 mb-2" id="helpSearchHeading">How can we help?</h2>
+        <p class="text-muted mb-3">Search this guide for a task, feature, validation rule, or troubleshooting tip.</p>
+        <div class="input-group">
+            <span class="input-group-text" id="helpSearchIcon"><i class="bi bi-search" aria-hidden="true"></i></span>
+            <input id="helpSearch" type="search" class="form-control" placeholder="Search Help &amp; User Guide" aria-describedby="helpSearchIcon" autocomplete="off">
+            <button id="clearHelpSearch" type="button" class="btn btn-outline-secondary d-none">Clear</button>
+        </div>
+        <div class="small text-muted mt-2" id="helpSearchStatus" aria-live="polite">Search all help topics</div>
+    </div>
+</section>
+
+<div id="helpNoResults" class="alert alert-info d-none" role="status">
+    <i class="bi bi-search me-2" aria-hidden="true"></i>No help topics match your search. Try a different word or clear the search.
+</div>
+
+<section class="mb-4" aria-labelledby="gettingStartedHeading">
+    <div class="d-flex align-items-center gap-2 mb-3">
+        <i class="bi bi-signpost-2 text-primary" aria-hidden="true"></i>
+        <h2 class="h4 mb-0" id="gettingStartedHeading">Getting Started</h2>
+    </div>
+    <div class="row g-3">
+        <div class="col-12 col-md-6 col-xl-4 help-searchable" data-help-searchable>
+            <article class="card h-100 help-step-card"><div class="card-body">
+                <span class="badge text-bg-primary mb-2">1</span><h3 class="h5">Configure Shop Settings</h3>
+                <p class="text-muted">Set your shop name, contact details, invoice prefix, tax percentage, footer note and optional logo before creating bills.</p>
+                <a href="{{ url_for('settings.shop') }}" class="btn btn-sm btn-outline-primary">Open Shop Settings</a>
+            </div></article>
+        </div>
+        <div class="col-12 col-md-6 col-xl-4 help-searchable" data-help-searchable>
+            <article class="card h-100 help-step-card"><div class="card-body">
+                <span class="badge text-bg-primary mb-2">2</span><h3 class="h5">Create Product Categories</h3>
+                <p class="text-muted">Create clear category names and optionally add a PNG, JPG or JPEG category image no larger than 2 MB.</p>
+                <a href="{{ url_for('categories.create') }}" class="btn btn-sm btn-outline-primary">Add Category</a>
+            </div></article>
+        </div>
+        <div class="col-12 col-md-6 col-xl-4 help-searchable" data-help-searchable>
+            <article class="card h-100 help-step-card"><div class="card-body">
+                <span class="badge text-bg-primary mb-2">3</span><h3 class="h5">Add Products</h3>
+                <p class="text-muted">Enter a unique SKU, product name, prices, unit, current stock and low-stock threshold. Products must have non-negative stock and prices.</p>
+                <a href="{{ url_for('products.create') }}" class="btn btn-sm btn-outline-primary">Add Product</a>
+            </div></article>
+        </div>
+        <div class="col-12 col-md-6 col-xl-4 help-searchable" data-help-searchable>
+            <article class="card h-100 help-step-card"><div class="card-body">
+                <span class="badge text-bg-primary mb-2">4</span><h3 class="h5">Add Customers</h3>
+                <p class="text-muted">Save a customer name, a unique active ten-digit phone number and an optional address for billing and balance tracking.</p>
+                <a href="{{ url_for('customers.create') }}" class="btn btn-sm btn-outline-primary">Add Customer</a>
+            </div></article>
+        </div>
+        <div class="col-12 col-md-6 col-xl-4 help-searchable" data-help-searchable>
+            <article class="card h-100 help-step-card"><div class="card-body">
+                <span class="badge text-bg-primary mb-2">5</span><h3 class="h5">Create Your First Bill</h3>
+                <p class="text-muted">Choose active products, enter quantities, select a payment status and save the bill. Stock is deducted only when the bill is successfully created.</p>
+                <a href="{{ url_for('billing.new_bill') }}" class="btn btn-sm btn-outline-primary">Create New Bill</a>
+            </div></article>
+        </div>
+        <div class="col-12 col-md-6 col-xl-4 help-searchable" data-help-searchable>
+            <article class="card h-100 help-step-card"><div class="card-body">
+                <span class="badge text-bg-primary mb-2">6</span><h3 class="h5">Create a Database Backup</h3>
+                <p class="text-muted">Create local SQLite backups regularly. Each backup is integrity-checked and listed in Backup History for later restore.</p>
+                <a href="{{ url_for('data_backup.index') }}" class="btn btn-sm btn-outline-primary">Open Data &amp; Backup</a>
+            </div></article>
+        </div>
+    </div>
+</section>
+
+<section class="mb-4" aria-labelledby="featureGuidesHeading">
+    <div class="d-flex align-items-center gap-2 mb-3">
+        <i class="bi bi-journal-text text-primary" aria-hidden="true"></i>
+        <h2 class="h4 mb-0" id="featureGuidesHeading">Feature Guides</h2>
+    </div>
+    <div class="accordion" id="helpFeatureAccordion">
+        <div class="accordion-item help-searchable" data-help-searchable>
+            <h3 class="accordion-header"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#helpDashboard" aria-expanded="true" aria-controls="helpDashboard">Dashboard</button></h3>
+            <div id="helpDashboard" class="accordion-collapse collapse show" data-bs-parent="#helpFeatureAccordion"><div class="accordion-body">
+                <p>The Dashboard gives a quick view of active products, low-stock products, today’s revenue and profit, recent sales, sales trends and top-selling products.</p>
+                <ol><li>Review the summary cards for today’s activity.</li><li>Use the sales chart to review trends and the top-products chart to see what sells most.</li><li>Select a product or low-stock summary link when you need to investigate further.</li></ol>
+                <a href="{{ url_for('main.index') }}" class="btn btn-sm btn-outline-primary">Open Dashboard</a>
+            </div></div>
+        </div>
+        <div class="accordion-item help-searchable" data-help-searchable>
+            <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#helpProducts">Products</button></h3>
+            <div id="helpProducts" class="accordion-collapse collapse" data-bs-parent="#helpFeatureAccordion"><div class="accordion-body">
+                <p>Products stores the item details used by billing and inventory, including SKU, barcode, category, unit, prices, stock quantity and low-stock threshold.</p>
+                <ol><li>Search by product details and use category, stock-status and sorting controls.</li><li>Use Edit to update product information.</li><li>Use Add Product to create a new item. SKU and barcode values must not duplicate existing products.</li></ol>
+                <p class="mb-2"><strong>Restriction:</strong> Products used in sales are archived rather than physically deleted.</p>
+                <a href="{{ url_for('products.index') }}" class="btn btn-sm btn-outline-primary">Open Products</a>
+            </div></div>
+        </div>
+        <div class="accordion-item help-searchable" data-help-searchable>
+            <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#helpCategories">Categories</button></h3>
+            <div id="helpCategories" class="accordion-collapse collapse" data-bs-parent="#helpFeatureAccordion"><div class="accordion-body">
+                <p>Categories organize products and can have an optional validated image.</p>
+                <ol><li>Open Categories and choose Add Category.</li><li>Enter a unique category name.</li><li>Optionally upload a valid PNG, JPG or JPEG image up to 2 MB.</li><li>Open a category to see its active products.</li></ol>
+                <p class="mb-2"><strong>Restriction:</strong> A category with active products assigned to it cannot be deleted until those products are reassigned.</p>
+                <a href="{{ url_for('categories.index') }}" class="btn btn-sm btn-outline-primary">Open Categories</a>
+            </div></div>
+        </div>
+        <div class="accordion-item help-searchable" data-help-searchable>
+            <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#helpCustomers">Customers &amp; Customer Balances</button></h3>
+            <div id="helpCustomers" class="accordion-collapse collapse" data-bs-parent="#helpFeatureAccordion"><div class="accordion-body">
+                <p>Customers stores contact details and maintains a ledger of pending amounts, payments and bill activity.</p>
+                <ol><li>Search customers by name or phone, then open a customer record.</li><li>Use Add Pending, Receive Payment or Clear Pending from the customer detail page.</li><li>Review Balance History and Bill History to understand the current balance.</li></ol>
+                <p class="mb-2"><strong>Validation:</strong> Customer names use letters and spaces, phone numbers must contain exactly ten digits, and a payment cannot exceed the pending balance.</p>
+                <a href="{{ url_for('customers.index') }}" class="btn btn-sm btn-outline-primary">Open Customers</a>
+            </div></div>
+        </div>
+        <div class="accordion-item help-searchable" data-help-searchable>
+            <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#helpBilling">New Bill &amp; Payment Status</button></h3>
+            <div id="helpBilling" class="accordion-collapse collapse" data-bs-parent="#helpFeatureAccordion"><div class="accordion-body">
+                <p>New Bill creates a sale, records payment information and reduces stock for each valid line item.</p>
+                <ol><li>Select active products and enter a positive quantity no greater than available stock.</li><li>Choose Paid, Pending or Partial and enter any payment reference.</li><li>Review the totals and save the bill to open the invoice.</li></ol>
+                <ul><li><strong>Paid:</strong> the full payable amount is recorded as paid.</li><li><strong>Pending:</strong> no payment is recorded.</li><li><strong>Partial:</strong> the paid amount must be greater than zero and less than the total payable.</li></ul>
+                <a href="{{ url_for('billing.new_bill') }}" class="btn btn-sm btn-outline-primary">Create New Bill</a>
+            </div></div>
+        </div>
+        <div class="accordion-item help-searchable" data-help-searchable>
+            <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#helpInventory">Inventory</button></h3>
+            <div id="helpInventory" class="accordion-collapse collapse" data-bs-parent="#helpFeatureAccordion"><div class="accordion-body">
+                <p>Inventory focuses on active stock monitoring. It shows stock by unit, low-stock and out-of-stock counts, purchase value, and the current product list.</p>
+                <ol><li>Search by product name or SKU.</li><li>Filter by category or stock status.</li><li>Use Edit, Adjust Stock or History for the selected product.</li><li>Use the export or print actions when you need a report.</li></ol>
+                <p class="mb-2"><strong>Status rules:</strong> Out of Stock is stock less than or equal to zero; Low Stock is above zero and at or below the alert threshold; Healthy is above the threshold.</p>
+                <a href="{{ url_for('products.inventory') }}" class="btn btn-sm btn-outline-primary">Open Inventory</a>
+            </div></div>
+        </div>
+        <div class="accordion-item help-searchable" data-help-searchable>
+            <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#helpAdjustments">Stock Adjustments</button></h3>
+            <div id="helpAdjustments" class="accordion-collapse collapse" data-bs-parent="#helpFeatureAccordion"><div class="accordion-body">
+                <p>Stock Adjustments record physical stock changes without changing billing logic.</p>
+                <ol><li>Open Inventory and choose Adjust Stock for an active product.</li><li>Choose Increase Stock, Decrease Stock or Set Stock.</li><li>Enter a valid quantity and a reason, then review the resulting stock.</li><li>Save the adjustment.</li></ol>
+                <p class="mb-2"><strong>Validation:</strong> Increase and decrease quantities must be positive, Set Stock may be zero, and the resulting stock cannot be negative. Archived products cannot be adjusted.</p>
+                <a href="{{ url_for('products.inventory') }}" class="btn btn-sm btn-outline-primary">Choose a Product in Inventory</a>
+            </div></div>
+        </div>
+        <div class="accordion-item help-searchable" data-help-searchable>
+            <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#helpHistory">Stock Movement History</button></h3>
+            <div id="helpHistory" class="accordion-collapse collapse" data-bs-parent="#helpFeatureAccordion"><div class="accordion-body">
+                <p>Stock History records the adjustment type, previous quantity, quantity changed, new quantity, reason and timestamp for a product.</p>
+                <ol><li>Open Inventory and choose History for a product.</li><li>Filter by Today, Last 7 Days, Last 30 Days or a custom date range.</li><li>Filter by adjustment type or search the reason text.</li></ol>
+                <p class="mb-2">History uses local calendar dates and excludes future-dated movements from the unfiltered view.</p>
+                <a href="{{ url_for('products.inventory') }}" class="btn btn-sm btn-outline-primary">Choose a Product in Inventory</a>
+            </div></div>
+        </div>
+        <div class="accordion-item help-searchable" data-help-searchable>
+            <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#helpReports">Daily Reports</button></h3>
+            <div id="helpReports" class="accordion-collapse collapse" data-bs-parent="#helpFeatureAccordion"><div class="accordion-body">
+                <p>Daily Reports summarize bills for a selected local calendar date.</p>
+                <ol><li>Choose a date and select View.</li><li>Review bills, sales, tax, outstanding balance, profit and top items.</li><li>Use Export CSV for the selected date.</li></ol>
+                <a href="{{ url_for('reports.daily') }}" class="btn btn-sm btn-outline-primary">Open Daily Reports</a>
+            </div></div>
+        </div>
+        <div class="accordion-item help-searchable" data-help-searchable>
+            <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#helpSettings">Shop Settings &amp; Invoice Preview</button></h3>
+            <div id="helpSettings" class="accordion-collapse collapse" data-bs-parent="#helpFeatureAccordion"><div class="accordion-body">
+                <p>Shop Settings controls the shop information and invoice defaults used by billing and printed or downloaded invoices.</p>
+                <ol><li>Update the shop name, phone, address, invoice prefix, tax percentage and footer note.</li><li>Optionally upload or remove the shop logo.</li><li>Use Invoice Preview to review the invoice appearance before creating a bill.</li></ol>
+                <p class="mb-2">The invoice page supports browser printing and PDF download.</p>
+                <a href="{{ url_for('settings.shop') }}" class="btn btn-sm btn-outline-primary">Open Shop Settings</a>
+            </div></div>
+        </div>
+        <div class="accordion-item help-searchable" data-help-searchable>
+            <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#helpBackup">Data &amp; Backup</button></h3>
+            <div id="helpBackup" class="accordion-collapse collapse" data-bs-parent="#helpFeatureAccordion"><div class="accordion-body">
+                <p>Data &amp; Backup manages local copies of the file-based SQLite billing database.</p>
+                <ol><li>Choose Create Backup.</li><li>Review the backup entry and its validation status.</li><li>To restore, choose a valid backup and confirm the replacement.</li></ol>
+                <p class="mb-2">Before restore, the application creates and validates a safety backup. Backup files are checked for SQLite integrity and required application tables.</p>
+                <a href="{{ url_for('data_backup.index') }}" class="btn btn-sm btn-outline-primary">Open Data &amp; Backup</a>
+            </div></div>
+        </div>
+    </div>
+</section>
+
+<section class="mb-4" aria-labelledby="faqHeading">
+    <div class="d-flex align-items-center gap-2 mb-3"><i class="bi bi-question-circle text-primary" aria-hidden="true"></i><h2 class="h4 mb-0" id="faqHeading">Frequently Asked Questions</h2></div>
+    <div class="row g-3">
+        <div class="col-12 col-lg-6 help-searchable" data-help-searchable><article class="card h-100"><div class="card-body"><h3 class="h6">Why is a product marked Low Stock?</h3><p class="mb-0 text-muted">Its stock is greater than zero and less than or equal to its low-stock alert threshold.</p></div></article></div>
+        <div class="col-12 col-lg-6 help-searchable" data-help-searchable><article class="card h-100"><div class="card-body"><h3 class="h6">What is the difference between Low Stock and Out of Stock?</h3><p class="mb-0 text-muted">Out of Stock means stock is zero or negative. Such products are not counted as Low Stock. Low Stock requires stock above zero.</p></div></article></div>
+        <div class="col-12 col-lg-6 help-searchable" data-help-searchable><article class="card h-100"><div class="card-body"><h3 class="h6">Why can’t I decrease stock below zero?</h3><p class="mb-0 text-muted">Stock adjustments prevent a negative resulting quantity. Check the physical quantity and use Set Stock when completing a count.</p></div></article></div>
+        <div class="col-12 col-lg-6 help-searchable" data-help-searchable><article class="card h-100"><div class="card-body"><h3 class="h6">What do Paid, Pending and Partial mean?</h3><p class="mb-0 text-muted">Paid records the full payable amount, Pending records no payment, and Partial records an amount greater than zero but less than the total payable.</p></div></article></div>
+        <div class="col-12 col-lg-6 help-searchable" data-help-searchable><article class="card h-100"><div class="card-body"><h3 class="h6">How is customer pending balance maintained?</h3><p class="mb-0 text-muted">Customer ledger debit and credit entries track manual dues, payments, cleared balances and customer-linked bills.</p></div></article></div>
+        <div class="col-12 col-lg-6 help-searchable" data-help-searchable><article class="card h-100"><div class="card-body"><h3 class="h6">Why can’t I delete a category?</h3><p class="mb-0 text-muted">Categories with active products assigned cannot be deleted. Reassign those active products first.</p></div></article></div>
+        <div class="col-12 col-lg-6 help-searchable" data-help-searchable><article class="card h-100"><div class="card-body"><h3 class="h6">What happens when I delete a product with sales history?</h3><p class="mb-0 text-muted">It is archived instead of physically deleted, and its SKU receives an archive suffix so historical sales remain safe.</p></div></article></div>
+        <div class="col-12 col-lg-6 help-searchable" data-help-searchable><article class="card h-100"><div class="card-body"><h3 class="h6">What is Inventory Value?</h3><p class="mb-0 text-muted">It is the purchase price multiplied by current stock for active products. Stock by unit is shown separately because pcs, kg and litres are not interchangeable.</p></div></article></div>
+        <div class="col-12 col-lg-6 help-searchable" data-help-searchable><article class="card h-100"><div class="card-body"><h3 class="h6">How do I create a backup?</h3><p class="mb-0 text-muted">Open Data &amp; Backup and select Create Backup. The local SQLite copy is integrity-checked and added to Backup History.</p></div></article></div>
+        <div class="col-12 col-lg-6 help-searchable" data-help-searchable><article class="card h-100"><div class="card-body"><h3 class="h6">What happens before restoring a backup?</h3><p class="mb-0 text-muted">A safety backup is created and validated first. The selected backup must also pass integrity and required-table checks.</p></div></article></div>
+        <div class="col-12 col-lg-6 help-searchable" data-help-searchable><article class="card h-100"><div class="card-body"><h3 class="h6">Does a database backup include uploaded shop and category images?</h3><p class="mb-0 text-muted">No. The backup implementation copies the SQLite database only. Uploaded shop and category images are stored as files under the static uploads area and are not included in the database backup.</p></div></article></div>
+    </div>
+</section>
+
+<section aria-labelledby="troubleshootingHeading">
+    <div class="d-flex align-items-center gap-2 mb-3"><i class="bi bi-tools text-primary" aria-hidden="true"></i><h2 class="h4 mb-0" id="troubleshootingHeading">Troubleshooting</h2></div>
+    <div class="list-group">
+        <div class="list-group-item help-searchable" data-help-searchable><h3 class="h6 mb-1">Product not appearing in billing</h3><p class="mb-0 text-muted">Confirm that the product is active. Archived products are excluded from billing and product search.</p></div>
+        <div class="list-group-item help-searchable" data-help-searchable><h3 class="h6 mb-1">Insufficient stock during billing</h3><p class="mb-0 text-muted">The requested quantity is greater than current stock. Reduce the quantity or adjust the stock after verifying the physical count.</p></div>
+        <div class="list-group-item help-searchable" data-help-searchable><h3 class="h6 mb-1">Duplicate SKU or barcode</h3><p class="mb-0 text-muted">Use a unique SKU and barcode. The product form rejects values already assigned to another product.</p></div>
+        <div class="list-group-item help-searchable" data-help-searchable><h3 class="h6 mb-1">Invalid customer phone number</h3><p class="mb-0 text-muted">Enter exactly ten digits. Names must contain letters and spaces, and an active customer phone number cannot be reused.</p></div>
+        <div class="list-group-item help-searchable" data-help-searchable><h3 class="h6 mb-1">Category image upload validation failure</h3><p class="mb-0 text-muted">Use a real PNG, JPG or JPEG image no larger than 2 MB. The extension, MIME type and image contents are checked.</p></div>
+        <div class="list-group-item help-searchable" data-help-searchable><h3 class="h6 mb-1">Stock adjustment rejected</h3><p class="mb-0 text-muted">Check the adjustment type, use a valid quantity with at most two decimal places, provide a reason, and ensure the resulting stock is not negative.</p></div>
+        <div class="list-group-item help-searchable" data-help-searchable><h3 class="h6 mb-1">Backup creation or validation failure</h3><p class="mb-0 text-muted">Confirm that the application uses a file-based SQLite database and that the backup directory is available. Only validated backups are listed as restorable.</p></div>
+        <div class="list-group-item help-searchable" data-help-searchable><h3 class="h6 mb-1">Backup restore rejection</h3><p class="mb-0 text-muted">Restore accepts only application backup filenames in the configured backup directory that pass integrity and required-table validation. Confirm the restore action when prompted.</p></div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    (() => {
+        const input = document.getElementById("helpSearch");
+        const clearButton = document.getElementById("clearHelpSearch");
+        const status = document.getElementById("helpSearchStatus");
+        const noResults = document.getElementById("helpNoResults");
+        const items = Array.from(document.querySelectorAll("[data-help-searchable]"));
+
+        function updateResults() {
+            const query = input.value.trim().toLowerCase();
+            let visibleCount = 0;
+            items.forEach((item) => {
+                const matches = !query || item.textContent.toLowerCase().includes(query);
+                item.classList.toggle("d-none", !matches);
+                if (matches) visibleCount += 1;
+            });
+            clearButton.classList.toggle("d-none", !query);
+            noResults.classList.toggle("d-none", visibleCount > 0);
+            status.textContent = query ? `${visibleCount} matching help topic${visibleCount === 1 ? "" : "s"}` : "Search all help topics";
+        }
+
+        input.addEventListener("input", updateResults);
+        clearButton.addEventListener("click", () => {
+            input.value = "";
+            input.focus();
+            updateResults();
+        });
+    })();
+</script>
+{% endblock %}

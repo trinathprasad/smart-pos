@@ -37,6 +37,7 @@ def create_app(config_class=Config):
 
     from .routes.auth import auth_bp
     from .routes.main import main_bp
+    from .routes.help import help_bp
     from .routes.products import products_bp
     from .routes.categories import categories_bp
     from .routes.quick_actions import quick_actions_bp
@@ -48,6 +49,7 @@ def create_app(config_class=Config):
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
+    app.register_blueprint(help_bp)
     app.register_blueprint(products_bp)
     app.register_blueprint(categories_bp)
     app.register_blueprint(quick_actions_bp)
