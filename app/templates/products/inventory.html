@@ -7,10 +7,20 @@
         <h1 class="h3 mb-1">Inventory</h1>
         <p class="text-muted mb-0">Monitor stock levels and inventory value for active products.</p>
     </div>
-    <a href="{{ url_for('products.create') }}" class="btn btn-primary d-inline-flex align-items-center">
-        <i class="bi bi-plus-circle me-2"></i>
-        Add Product
-    </a>
+    <div class="d-flex flex-wrap gap-2">
+        <a href="{{ url_for('products.inventory_export_csv', q=query, category=category_filter, filter=stock_filter) }}" class="btn btn-outline-secondary d-inline-flex align-items-center">
+            <i class="bi bi-filetype-csv text-success me-2"></i>Export CSV
+        </a>
+        <a href="{{ url_for('products.inventory_export_excel', q=query, category=category_filter, filter=stock_filter) }}" class="btn btn-outline-secondary d-inline-flex align-items-center">
+            <i class="bi bi-file-earmark-spreadsheet text-success me-2"></i>Export Excel
+        </a>
+        <a href="{{ url_for('products.inventory_print', q=query, category=category_filter, filter=stock_filter) }}" class="btn btn-outline-secondary d-inline-flex align-items-center">
+            <i class="bi bi-printer me-2"></i>Print Report
+        </a>
+        <a href="{{ url_for('products.create') }}" class="btn btn-primary d-inline-flex align-items-center">
+            <i class="bi bi-plus-circle me-2"></i>Add Product
+        </a>
+    </div>
 </div>
 
 <div class="row g-4 mb-4">
@@ -36,18 +46,22 @@
         </div></div>
     </div>
     <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card stat-card h-100"><div class="card-body">
+        <a class="card stat-card dashboard-stat-link h-100" href="{{ url_for('products.inventory', q=query, category=category_filter, filter='low_stock') }}" title="View low-stock products" aria-label="View low-stock products">
+            <div class="card-body">
             <div class="kpi-card-title"><i class="bi bi-exclamation-triangle text-warning"></i><span>Low Stock</span></div>
-            <h2 class="mb-1 stat-value stat-value-low-stock-alert">{{ inventory_stats.low_stock }}</h2>
-            <p class="kpi-comparison text-muted mb-0">Above zero, at or below alert</p>
-        </div></div>
+            <h2 class="mb-1 stat-value stat-value-low-stock-alert">{{ matching_low_stock_count }}</h2>
+            <p class="kpi-comparison text-muted mb-0">Matching low-stock products</p>
+            </div>
+        </a>
     </div>
     <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card stat-card h-100"><div class="card-body">
+        <a class="card stat-card dashboard-stat-link h-100" href="{{ url_for('products.inventory', q=query, category=category_filter, filter='out_of_stock') }}" title="View out-of-stock products" aria-label="View out-of-stock products">
+            <div class="card-body">
             <div class="kpi-card-title"><i class="bi bi-x-circle text-danger"></i><span>Out of Stock</span></div>
-            <h2 class="mb-1 stat-value stat-value-out-of-stock">{{ inventory_stats.out_of_stock }}</h2>
-            <p class="kpi-comparison text-muted mb-0">Zero or negative stock</p>
-        </div></div>
+            <h2 class="mb-1 stat-value stat-value-out-of-stock">{{ matching_out_of_stock_count }}</h2>
+            <p class="kpi-comparison text-muted mb-0">Matching out-of-stock products</p>
+            </div>
+        </a>
     </div>
     <div class="col-12 col-sm-6 col-xl-3">
         <div class="card stat-card h-100"><div class="card-body">
@@ -91,6 +105,12 @@
                 <button class="btn btn-primary d-inline-flex align-items-center justify-content-center" type="submit"><i class="bi bi-funnel me-2"></i>Apply</button>
             </div>
         </form>
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-3 pt-3 border-top">
+            <span class="text-muted">{{ matching_product_count }} matching product{{ "s" if matching_product_count != 1 else "" }}</span>
+            {% if stock_filter %}
+                <a href="{{ url_for('products.inventory', q=query, category=category_filter) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-box-seam me-1"></i>View All Products</a>
+            {% endif %}
+        </div>
     </div>
 </div>
 

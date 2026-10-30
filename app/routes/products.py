@@ -1,15 +1,15 @@
 import csv
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal, InvalidOperation
-from io import StringIO
+from io import BytesIO, StringIO
 
-from flask import Blueprint, Response, flash, redirect, render_template, request, url_for
+from flask import Blueprint, Response, flash, redirect, render_template, request, send_file, url_for
 from sqlalchemy import and_, case, func, or_
 from sqlalchemy.exc import IntegrityError
 
 from ..extensions import db
-from ..models import Category, Product, SaleItem, StockMovement
-from ..utils import format_indian_number, local_today, to_decimal, utc_bounds_for_local_date
+from ..models import Category, Product, SaleItem, ShopSetting, StockMovement
+from ..utils import LOCAL_TIMEZONE, format_indian_number, local_today, to_decimal, utc_bounds_for_local_date
 
 
 products_bp = Blueprint("products", __name__, url_prefix="/products")
@@ -55,6 +55,89 @@ def _inventory_statistics():
         "inventory_value": inventory_value,
         "inventory_value_display": format_indian_number(inventory_value),
     }
+
+
+def _inventory_filter_values():
+    query = request.args.get("q", "").strip()
+    category_filter = request.args.get("category", "").strip()
+    stock_filter = request.args.get("filter", "").strip().lower()
+    if stock_filter not in {"healthy", "low_stock", "out_of_stock"}:
+        stock_filter = ""
+    return query, category_filter, stock_filter
+
+
+def _inventory_product_query(query="", category_filter="", stock_filter=""):
+    product_query = (
+        Product.query.outerjoin(Category, Product.category_id == Category.id)
+        .filter(Product.is_active.is_(True))
+    )
+    if query:
+        like = f"%{query}%"
+        product_query = product_query.filter(or_(Product.name.ilike(like), Product.sku.ilike(like)))
+    if category_filter.isdigit():
+        product_query = product_query.filter(Product.category_id == int(category_filter))
+    elif category_filter:
+        product_query = product_query.filter(Product.category == category_filter)
+    if stock_filter == "healthy":
+        product_query = product_query.filter(Product.stock_qty > 0, Product.stock_qty > Product.low_stock_threshold)
+    elif stock_filter == "low_stock":
+        product_query = product_query.filter(Product.stock_qty > 0, Product.stock_qty <= Product.low_stock_threshold)
+    elif stock_filter == "out_of_stock":
+        product_query = product_query.filter(Product.stock_qty <= 0)
+    return product_query
+
+
+def _stock_status(product):
+    if product.is_out_of_stock():
+        return "Out of Stock"
+    if product.is_low_stock():
+        return "Low Stock"
+    return "Healthy"
+
+
+def _inventory_report_stats(products):
+    inventory_value = sum(
+        (product.purchase_price * product.stock_qty for product in products),
+        start=Decimal("0.00"),
+    )
+    return {
+        "total_products": len(products),
+        "low_stock": sum(1 for product in products if product.is_low_stock()),
+        "out_of_stock": sum(1 for product in products if product.is_out_of_stock()),
+        "inventory_value": inventory_value,
+        "inventory_value_display": format_indian_number(inventory_value),
+    }
+
+
+def _safe_spreadsheet_text(value):
+    text = "" if value is None else str(value)
+    if text.startswith(("=", "+", "-", "@")):
+        return f"'{text}"
+    return text
+
+
+def _inventory_export_rows(products):
+    return [
+        [
+            _safe_spreadsheet_text(product.sku),
+            _safe_spreadsheet_text(product.name),
+            _safe_spreadsheet_text((product.category_record.name if product.category_record else product.category) or ""),
+            _safe_spreadsheet_text(product.unit),
+            product.purchase_price,
+            product.selling_price,
+            product.stock_qty,
+            product.low_stock_threshold,
+            _safe_spreadsheet_text(_stock_status(product)),
+            product.purchase_price * product.stock_qty,
+        ]
+        for product in products
+    ]
+
+
+def _filtered_inventory_products():
+    query, category_filter, stock_filter = _inventory_filter_values()
+    products = _inventory_product_query(query, category_filter, stock_filter).order_by(Product.name.asc(), Product.sku.asc()).all()
+    return products, query, category_filter, stock_filter
 
 
 def _clean_barcode(value: str | None) -> str | None:
@@ -216,31 +299,7 @@ def index():
 
 @products_bp.route("/inventory")
 def inventory():
-    query = request.args.get("q", "").strip()
-    category_filter = request.args.get("category", "").strip()
-    stock_filter = request.args.get("filter", "").strip().lower()
-    if stock_filter not in {"healthy", "low_stock", "out_of_stock"}:
-        stock_filter = ""
-
-    product_query = (
-        Product.query.outerjoin(Category, Product.category_id == Category.id)
-        .filter(Product.is_active.is_(True))
-    )
-    if query:
-        like = f"%{query}%"
-        product_query = product_query.filter(or_(Product.name.ilike(like), Product.sku.ilike(like)))
-    if category_filter.isdigit():
-        product_query = product_query.filter(Product.category_id == int(category_filter))
-    elif category_filter:
-        product_query = product_query.filter(Product.category == category_filter)
-    if stock_filter == "healthy":
-        product_query = product_query.filter(Product.stock_qty > 0, Product.stock_qty > Product.low_stock_threshold)
-    elif stock_filter == "low_stock":
-        product_query = product_query.filter(Product.stock_qty > 0, Product.stock_qty <= Product.low_stock_threshold)
-    elif stock_filter == "out_of_stock":
-        product_query = product_query.filter(Product.stock_qty <= 0)
-
-    products = product_query.order_by(Product.name.asc(), Product.sku.asc()).all()
+    products, query, category_filter, stock_filter = _filtered_inventory_products()
     categories = (
         Category.query.join(Product, Product.category_id == Category.id)
         .filter(Product.is_active.is_(True))
@@ -248,11 +307,122 @@ def inventory():
         .order_by(Category.name.asc())
         .all()
     )
+    matching_low_stock_count = _inventory_product_query(query, category_filter, "low_stock").count()
+    matching_out_of_stock_count = _inventory_product_query(query, category_filter, "out_of_stock").count()
     return render_template(
         "products/inventory.html",
         products=products,
         inventory_stats=_inventory_statistics(),
         categories=categories,
+        query=query,
+        category_filter=category_filter,
+        stock_filter=stock_filter,
+        matching_product_count=len(products),
+        matching_low_stock_count=matching_low_stock_count,
+        matching_out_of_stock_count=matching_out_of_stock_count,
+    )
+
+
+def _inventory_timestamp():
+    return datetime.now(LOCAL_TIMEZONE).strftime("%Y%m%d-%H%M%S")
+
+
+@products_bp.route("/inventory/export.csv")
+def inventory_export_csv():
+    products, _, _, _ = _filtered_inventory_products()
+    csv_buffer = StringIO(newline="")
+    writer = csv.writer(csv_buffer)
+    writer.writerow(
+        [
+            "SKU",
+            "Product Name",
+            "Category",
+            "Unit",
+            "Purchase Price",
+            "Selling Price",
+            "Current Stock",
+            "Low-stock Alert",
+            "Stock Status",
+            "Inventory Purchase Value",
+        ]
+    )
+    writer.writerows(_inventory_export_rows(products))
+    filename = f"inventory-{_inventory_timestamp()}.csv"
+    return Response(
+        csv_buffer.getvalue().encode("utf-8-sig"),
+        mimetype="text/csv",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@products_bp.route("/inventory/export.xlsx")
+def inventory_export_excel():
+    products, _, _, _ = _filtered_inventory_products()
+    try:
+        from openpyxl import Workbook
+        from openpyxl.styles import Alignment, Font, PatternFill
+    except ImportError:
+        return Response("Excel export is unavailable because openpyxl is not installed.", status=503, mimetype="text/plain")
+
+    workbook = Workbook()
+    sheet = workbook.active
+    sheet.title = "Inventory"
+    headers = [
+        "SKU",
+        "Product Name",
+        "Category",
+        "Unit",
+        "Purchase Price",
+        "Selling Price",
+        "Current Stock",
+        "Low-stock Alert",
+        "Stock Status",
+        "Inventory Purchase Value",
+    ]
+    sheet.append(headers)
+    for cell in sheet[1]:
+        cell.font = Font(bold=True, color="FFFFFF")
+        cell.fill = PatternFill("solid", fgColor="0A8EC2")
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+    for row in _inventory_export_rows(products):
+        sheet.append([float(value) if isinstance(value, Decimal) else value for value in row])
+    for row in sheet.iter_rows(min_row=2, min_col=5, max_col=6):
+        for cell in row:
+            cell.number_format = '₹#,##0.00'
+    for row in sheet.iter_rows(min_row=2, min_col=7, max_col=8):
+        for cell in row:
+            cell.number_format = '#,##0.00'
+    for cell in sheet.iter_cols(min_col=10, max_col=10, min_row=2):
+        for value_cell in cell:
+            value_cell.number_format = '₹#,##0.00'
+    widths = [18, 28, 20, 12, 16, 16, 16, 16, 18, 26]
+    for index, width in enumerate(widths, start=1):
+        sheet.column_dimensions[chr(64 + index)].width = width
+    sheet.freeze_panes = "A2"
+    sheet.auto_filter.ref = sheet.dimensions
+    sheet.row_dimensions[1].height = 24
+    output = BytesIO()
+    workbook.save(output)
+    output.seek(0)
+    filename = f"inventory-{_inventory_timestamp()}.xlsx"
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name=filename,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
+
+@products_bp.route("/inventory/print")
+def inventory_print():
+    products, query, category_filter, stock_filter = _filtered_inventory_products()
+    shop = ShopSetting.query.first()
+    return render_template(
+        "products/inventory_print.html",
+        products=products,
+        report_stats=_inventory_report_stats(products),
+        shop=shop,
+        generated_at=datetime.now(timezone.utc),
         query=query,
         category_filter=category_filter,
         stock_filter=stock_filter,

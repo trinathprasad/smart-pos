@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Inventory Report | Local Shop Billing{% endblock %}
+{% block body_class %}page-inventory inventory-print-page{% endblock %}
+{% block content %}
+<style>
+    .inventory-print-report { max-width: 1180px; margin: 0 auto; }
+    .inventory-print-brand { border-bottom: 2px solid var(--brand-primary-dark); }
+    .inventory-print-meta { color: var(--brand-muted); }
+    .inventory-print-table { font-size: 0.9rem; }
+    @media print {
+        @page { size: auto; margin: 12mm; }
+        body { background: #fff !important; color: #111827 !important; }
+        .app-top-header, .app-navbar, .app-sidebar, .no-print, .app-page-loader { display: none !important; }
+        .app-layout, .app-main, .app-content { display: block !important; width: 100% !important; min-height: 0 !important; margin: 0 !important; padding: 0 !important; }
+        .inventory-print-report { max-width: none; }
+        .inventory-print-brand { border-color: #111827; }
+        .inventory-print-table thead { display: table-header-group; }
+        .inventory-print-table tr { page-break-inside: avoid; }
+        .inventory-print-table th, .inventory-print-table td { border-color: #9CA3AF !important; color: #111827 !important; background: #fff !important; }
+        .inventory-print-summary { page-break-inside: avoid; }
+    }
+</style>
+<div class="inventory-print-report">
+    <div class="inventory-print-brand pb-3 mb-4">
+        <h1 class="h3 mb-1">{{ shop.shop_name if shop else "Smart Store Billing" }}</h1>
+        {% if shop and shop.address %}<div>{{ shop.address }}</div>{% endif %}
+        {% if shop and shop.phone %}<div>{{ shop.phone }}</div>{% endif %}
+    </div>
+    <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
+        <div>
+            <h2 class="h4 mb-1">Inventory Report</h2>
+            <p class="inventory-print-meta mb-0">Generated {{ generated_at|bill_datetime }}</p>
+        </div>
+        <button type="button" class="btn btn-primary no-print" onclick="window.print()"><i class="bi bi-printer me-2"></i>Print</button>
+    </div>
+    <div class="row g-3 inventory-print-summary mb-4">
+        <div class="col-6 col-lg-3"><div class="border rounded p-3 h-100"><div class="small text-muted">Active Products</div><strong class="fs-5">{{ report_stats.total_products }}</strong></div></div>
+        <div class="col-6 col-lg-3"><div class="border rounded p-3 h-100"><div class="small text-muted">Low-stock Products</div><strong class="fs-5">{{ report_stats.low_stock }}</strong></div></div>
+        <div class="col-6 col-lg-3"><div class="border rounded p-3 h-100"><div class="small text-muted">Out-of-stock Products</div><strong class="fs-5">{{ report_stats.out_of_stock }}</strong></div></div>
+        <div class="col-6 col-lg-3"><div class="border rounded p-3 h-100"><div class="small text-muted">Total Purchase Value</div><strong class="fs-5">&#8377;{{ report_stats.inventory_value_display }}</strong></div></div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-bordered align-middle inventory-print-table">
+            <thead><tr><th>SKU</th><th>Product</th><th>Category</th><th>Unit</th><th>Purchase Price</th><th>Selling Price</th><th>Current Stock</th><th>Stock Status</th></tr></thead>
+            <tbody>
+            {% for product in products %}
+                <tr>
+                    <td>{{ product.sku }}</td>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.category_record.name if product.category_record else (product.category or "-") }}</td>
+                    <td>{{ product.unit }}</td>
+                    <td>&#8377;{{ "%.2f"|format(product.purchase_price) }}</td>
+                    <td>&#8377;{{ "%.2f"|format(product.selling_price) }}</td>
+                    <td>{{ product.stock_qty|quantity }} {{ product.unit }}</td>
+                    <td>{% if product.is_out_of_stock() %}Out of Stock{% elif product.is_low_stock() %}Low Stock{% else %}Healthy{% endif %}</td>
+                </tr>
+            {% else %}
+                <tr><td colspan="8" class="text-center py-4">No active products match the selected filters.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
