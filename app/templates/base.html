@@ -103,10 +103,10 @@
                         <i class="bi bi-lightning-charge" aria-hidden="true"></i>
                         <span>Quick Actions</span>
                     </a>
-                    <div class="app-sidebar-link" role="button" tabindex="0" data-sidebar-item="inventory" title="Inventory" data-bs-placement="right">
+                    <a class="app-sidebar-link{% if active_section == 'inventory' %} active{% endif %}" href="{{ url_for('products.inventory') }}" data-sidebar-item="inventory" title="Inventory" data-bs-placement="right"{% if active_section == 'inventory' %} aria-current="page"{% endif %}>
                         <i class="bi bi-boxes" aria-hidden="true"></i>
                         <span>Inventory</span>
-                    </div>
+                    </a>
                     <a class="app-sidebar-link{% if active_section == 'data_backup' %} active{% endif %}" href="{{ url_for('data_backup.index') }}" data-sidebar-item="data-backup" title="Data &amp; Backup" data-bs-placement="right">
                         <i class="bi bi-database" aria-hidden="true"></i>
                         <span>Data &amp; Backup</span>

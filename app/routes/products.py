@@ -3,7 +3,7 @@ from decimal import Decimal
 from io import StringIO
 
 from flask import Blueprint, Response, flash, redirect, render_template, request, url_for
-from sqlalchemy import or_
+from sqlalchemy import and_, case, func, or_
 from sqlalchemy.exc import IntegrityError
 
 from ..extensions import db
@@ -15,15 +15,36 @@ products_bp = Blueprint("products", __name__, url_prefix="/products")
 
 
 def _product_statistics():
-    products = Product.query.filter_by(is_active=True).all()
-    inventory_value = sum(
-        (product.purchase_price * product.stock_qty for product in products),
-        start=Decimal("0.00"),
+    statistics = _inventory_statistics()
+    return {
+        "total_products": statistics["total_products"],
+        "low_stock": statistics["low_stock"],
+        "out_of_stock": statistics["out_of_stock"],
+        "inventory_value": statistics["inventory_value"],
+        "inventory_value_display": statistics["inventory_value_display"],
+    }
+
+
+def _inventory_statistics():
+    total_products, total_units, low_stock, out_of_stock, inventory_value = (
+        db.session.query(
+            func.count(Product.id),
+            func.coalesce(func.sum(Product.stock_qty), 0),
+            func.coalesce(
+                func.sum(case((and_(Product.stock_qty > 0, Product.stock_qty <= Product.low_stock_threshold), 1), else_=0)),
+                0,
+            ),
+            func.coalesce(func.sum(case((Product.stock_qty <= 0, 1), else_=0)), 0),
+            func.coalesce(func.sum(Product.purchase_price * Product.stock_qty), 0),
+        )
+        .filter(Product.is_active.is_(True))
+        .one()
     )
     return {
-        "total_products": len(products),
-        "low_stock": sum(1 for product in products if product.is_low_stock()),
-        "out_of_stock": sum(1 for product in products if product.is_out_of_stock()),
+        "total_products": total_products,
+        "total_units": total_units,
+        "low_stock": low_stock,
+        "out_of_stock": out_of_stock,
         "inventory_value": inventory_value,
         "inventory_value_display": format_indian_number(inventory_value),
     }
@@ -160,6 +181,51 @@ def index():
         stock_filter=stock_filter,
         sort=sort,
         direction=direction,
+    )
+
+
+@products_bp.route("/inventory")
+def inventory():
+    query = request.args.get("q", "").strip()
+    category_filter = request.args.get("category", "").strip()
+    stock_filter = request.args.get("filter", "").strip().lower()
+    if stock_filter not in {"healthy", "low_stock", "out_of_stock"}:
+        stock_filter = ""
+
+    product_query = (
+        Product.query.outerjoin(Category, Product.category_id == Category.id)
+        .filter(Product.is_active.is_(True))
+    )
+    if query:
+        like = f"%{query}%"
+        product_query = product_query.filter(or_(Product.name.ilike(like), Product.sku.ilike(like)))
+    if category_filter.isdigit():
+        product_query = product_query.filter(Product.category_id == int(category_filter))
+    elif category_filter:
+        product_query = product_query.filter(Product.category == category_filter)
+    if stock_filter == "healthy":
+        product_query = product_query.filter(Product.stock_qty > 0, Product.stock_qty > Product.low_stock_threshold)
+    elif stock_filter == "low_stock":
+        product_query = product_query.filter(Product.stock_qty > 0, Product.stock_qty <= Product.low_stock_threshold)
+    elif stock_filter == "out_of_stock":
+        product_query = product_query.filter(Product.stock_qty <= 0)
+
+    products = product_query.order_by(Product.name.asc(), Product.sku.asc()).all()
+    categories = (
+        Category.query.join(Product, Product.category_id == Category.id)
+        .filter(Product.is_active.is_(True))
+        .distinct()
+        .order_by(Category.name.asc())
+        .all()
+    )
+    return render_template(
+        "products/inventory.html",
+        products=products,
+        inventory_stats=_inventory_statistics(),
+        categories=categories,
+        query=query,
+        category_filter=category_filter,
+        stock_filter=stock_filter,
     )
 
 
