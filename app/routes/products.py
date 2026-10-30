@@ -1,5 +1,5 @@
 import csv
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from io import StringIO
 
 from flask import Blueprint, Response, flash, redirect, render_template, request, url_for
@@ -7,7 +7,7 @@ from sqlalchemy import and_, case, func, or_
 from sqlalchemy.exc import IntegrityError
 
 from ..extensions import db
-from ..models import Category, Product, SaleItem
+from ..models import Category, Product, SaleItem, StockMovement
 from ..utils import format_indian_number, to_decimal
 
 
@@ -26,10 +26,9 @@ def _product_statistics():
 
 
 def _inventory_statistics():
-    total_products, total_units, low_stock, out_of_stock, inventory_value = (
+    total_products, low_stock, out_of_stock, inventory_value = (
         db.session.query(
             func.count(Product.id),
-            func.coalesce(func.sum(Product.stock_qty), 0),
             func.coalesce(
                 func.sum(case((and_(Product.stock_qty > 0, Product.stock_qty <= Product.low_stock_threshold), 1), else_=0)),
                 0,
@@ -40,9 +39,16 @@ def _inventory_statistics():
         .filter(Product.is_active.is_(True))
         .one()
     )
+    unit_totals = (
+        db.session.query(Product.unit, func.sum(Product.stock_qty))
+        .filter(Product.is_active.is_(True))
+        .group_by(Product.unit)
+        .order_by(Product.unit.asc())
+        .all()
+    )
     return {
         "total_products": total_products,
-        "total_units": total_units,
+        "unit_totals": unit_totals,
         "low_stock": low_stock,
         "out_of_stock": out_of_stock,
         "inventory_value": inventory_value,
@@ -73,6 +79,29 @@ def _safe_return_path():
     if return_to.startswith("/") and not return_to.startswith("//"):
         return return_to
     return None
+
+
+def _parse_adjustment_quantity(raw_value):
+    raw_value = (raw_value or "").strip()
+    if not raw_value:
+        return None, "Quantity is required."
+    try:
+        quantity = Decimal(raw_value)
+    except (InvalidOperation, TypeError, ValueError):
+        return None, "Quantity must be a valid decimal."
+    if not quantity.is_finite() or quantity < 0:
+        return None, "Quantity must be a non-negative decimal."
+    if quantity.as_tuple().exponent < -2:
+        return None, "Quantity can have at most 2 decimal places."
+    return quantity, None
+
+
+def _adjustment_form_context(product, return_to=None, form_data=None):
+    return {
+        "product": product,
+        "return_to": return_to,
+        "form_data": form_data or {},
+    }
 
 
 def _render_product_form(product=None, selected_category_id=None):
@@ -227,6 +256,80 @@ def inventory():
         category_filter=category_filter,
         stock_filter=stock_filter,
     )
+
+
+@products_bp.route("/<int:product_id>/adjust-stock", methods=["GET", "POST"])
+def adjust_stock(product_id):
+    product = Product.query.filter(Product.id == product_id, Product.is_active.is_(True)).first()
+    return_to = _safe_return_path()
+    if product is None:
+        flash("Archived or unavailable products cannot be adjusted.", "danger")
+        return redirect(return_to or url_for("products.inventory"))
+
+    if request.method == "POST":
+        adjustment_type = request.form.get("adjustment_type", "").strip().lower()
+        reason = request.form.get("reason", "").strip()
+        quantity, quantity_error = _parse_adjustment_quantity(request.form.get("quantity"))
+        form_data = request.form.to_dict(flat=True)
+        errors = []
+        if adjustment_type not in {"increase", "decrease", "set"}:
+            errors.append("Choose a valid adjustment type.")
+        if quantity_error:
+            errors.append(quantity_error)
+        if not reason:
+            errors.append("An adjustment reason is required.")
+        if adjustment_type in {"increase", "decrease"} and quantity is not None and quantity <= 0:
+            errors.append("Increase and decrease quantities must be greater than zero.")
+
+        if errors:
+            for error in errors:
+                flash(error, "danger")
+            return render_template("products/stock_adjust.html", **_adjustment_form_context(product, return_to, form_data))
+
+        previous_qty = Decimal(product.stock_qty)
+        if adjustment_type == "increase":
+            new_qty = previous_qty + quantity
+        elif adjustment_type == "decrease":
+            new_qty = previous_qty - quantity
+        else:
+            new_qty = quantity
+        quantity_changed = new_qty - previous_qty
+        if new_qty < 0:
+            flash("The adjustment cannot reduce stock below zero.", "danger")
+            return render_template("products/stock_adjust.html", **_adjustment_form_context(product, return_to, form_data))
+
+        try:
+            product.stock_qty = new_qty
+            db.session.add(
+                StockMovement(
+                    product_id=product.id,
+                    adjustment_type=adjustment_type,
+                    previous_qty=previous_qty,
+                    quantity_changed=quantity_changed,
+                    new_qty=new_qty,
+                    reason=reason,
+                )
+            )
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            flash("Could not save the stock adjustment. No changes were made.", "danger")
+            return render_template("products/stock_adjust.html", **_adjustment_form_context(product, return_to, form_data))
+
+        flash(
+            f"Stock adjusted successfully. New stock: {new_qty.normalize():f} {product.unit}.",
+            "success",
+        )
+        return redirect(return_to or url_for("products.inventory"))
+
+    return render_template("products/stock_adjust.html", **_adjustment_form_context(product, return_to))
+
+
+@products_bp.route("/<int:product_id>/stock-history")
+def stock_history(product_id):
+    product = Product.query.get_or_404(product_id)
+    movements = StockMovement.query.filter_by(product_id=product.id).order_by(StockMovement.created_at.desc(), StockMovement.id.desc()).all()
+    return render_template("products/stock_history.html", product=product, movements=movements, return_to=_safe_return_path())
 
 
 @products_bp.route("/export")

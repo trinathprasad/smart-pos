@@ -66,6 +66,28 @@ class Product(db.Model):
         return self.stock_qty > 0 and self.stock_qty > self.low_stock_threshold
 
 
+class StockMovement(db.Model):
+    """Immutable stock adjustment history.
+
+    product_id intentionally remains a historical reference rather than a
+    foreign key. This allows movement records to survive physical deletion of
+    products that have never been used in a sale.
+    """
+
+    id = db.Column(db.Integer, primary_key=True)
+    product_id = db.Column(db.Integer, nullable=False, index=True)
+    adjustment_type = db.Column(db.String(20), nullable=False)
+    previous_qty = db.Column(Numeric(10, 2), nullable=False)
+    quantity_changed = db.Column(Numeric(10, 2), nullable=False)
+    new_qty = db.Column(Numeric(10, 2), nullable=False)
+    reason = db.Column(db.String(250), nullable=False)
+    created_at = db.Column(
+        db.DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
+    )
+
+
 
 
 class Sale(db.Model):

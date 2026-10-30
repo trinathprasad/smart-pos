@@ -23,9 +23,16 @@
     </div>
     <div class="col-12 col-sm-6 col-xl-3">
         <div class="card stat-card h-100"><div class="card-body">
-            <div class="kpi-card-title"><i class="bi bi-stack text-info"></i><span>Units in Stock</span></div>
-            <h2 class="mb-1 stat-value stat-value-inventory">{{ inventory_stats.total_units|quantity }}</h2>
-            <p class="kpi-comparison text-muted mb-0">Across active products</p>
+            <div class="kpi-card-title"><i class="bi bi-stack text-info"></i><span>Stock by Unit</span></div>
+            {% for unit, quantity in inventory_stats.unit_totals %}
+                <div class="d-flex justify-content-between align-items-baseline {% if not loop.first %}mt-1{% endif %}">
+                    <strong class="stat-value stat-value-inventory">{{ quantity|quantity }}</strong>
+                    <span class="text-muted">{{ unit or "unit" }}</span>
+                </div>
+            {% else %}
+                <strong class="stat-value stat-value-inventory">0</strong>
+                <p class="kpi-comparison text-muted mb-0">No active stock</p>
+            {% endfor %}
         </div></div>
     </div>
     <div class="col-12 col-sm-6 col-xl-3">
@@ -111,7 +118,8 @@
                     </td>
                     <td class="text-end"><div class="product-table-actions">
                         <a href="{{ url_for('products.edit', product_id=product.id, return_to=url_for('products.inventory')) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil me-1"></i>Edit</a>
-                        <button type="button" class="btn btn-sm btn-outline-primary" disabled title="Stock adjustment is planned for Phase 2"><i class="bi bi-sliders me-1"></i>Adjust Stock</button>
+                        <a href="{{ url_for('products.adjust_stock', product_id=product.id, return_to=url_for('products.inventory', q=query, category=category_filter, filter=stock_filter)) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-sliders me-1"></i>Adjust Stock</a>
+                        <a href="{{ url_for('products.stock_history', product_id=product.id, return_to=url_for('products.inventory', q=query, category=category_filter, filter=stock_filter)) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-clock-history me-1"></i>History</a>
                     </div></td>
                 </tr>
             {% else %}
